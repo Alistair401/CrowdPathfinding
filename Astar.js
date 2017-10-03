@@ -23,9 +23,16 @@ class GraphNode {
         this.x_index = x_index;
         this.y_index = y_index;
 
-        this.g_score = Math.POSITIVE_INFINITY;
-        this.came_from = null;
-        this.f_score = Math.POSITIVE_INFINITY;
+        if (mode == 0) {
+            this.g_score = Math.POSITIVE_INFINITY;
+            this.came_from = null;
+            this.f_score = Math.POSITIVE_INFINITY;
+        }
+
+        if (mode == 1) {
+            this.vectors = new Array(target_count);
+            this.target_distances = new Array(target_count);
+        }
     }
 }
 
@@ -33,9 +40,6 @@ class Unit {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-
-        this.x_vel = 0;
-        this.y_vel = 0;
 
         this.target = null;
 
@@ -60,14 +64,19 @@ class Unit {
                 this.path = aStarPathfind(this.x, this.y, this.target.x, this.target.y);
             }
             if (this.path.length > 0) {
-                this.x_vel = this.path[this.path.length - 1].x - this.x;
-                this.y_vel = this.path[this.path.length - 1].y - this.y;
-                let direction_vector = normalize(this.x_vel, this.y_vel);
+                let x_dist = this.path[this.path.length - 1].x - this.x;
+                let y_dist = this.path[this.path.length - 1].y - this.y;
+                let direction_vector = normalize(x_dist, y_dist);
                 this.updatePosition(this.x + direction_vector.x, this.y + direction_vector.y)
                 if (pythagorean(this.x, this.y, this.path[this.path.length - 1].x, this.path[this.path.length - 1].y) < 5) {
                     this.path.pop();
                 }
             }
+        }
+        if (mode == 1) {
+            let current_node = pointToGraph(this.x, this.y);
+            let direction_vector = current_node.vectors[this.target.index];
+            this.updatePosition(this.x + direction_vector.x, this.y + direction_vector.y)
         }
     }
 
@@ -81,6 +90,7 @@ class Unit {
 
 class Target {
     constructor(x, y) {
+        this.index = Target.count++;
         this.x = x;
         this.y = y;
         this.shape = new createjs.Shape()
@@ -90,16 +100,14 @@ class Target {
         this.shape.y = this.y;
 
         stage.addChild(this.shape);
-
-        if (mode == 1) {
-            this.vector_field = vectorFieldWavefront(this.x, this.y);
-        }
     }
 }
+Target.count = 0;
 
-class vectorFieldVector {
-    constructor(x,y){
-        
+class Vector {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -163,7 +171,11 @@ function initTargets() {
     for (let i = 0; i < target_count; i++) {
         let rand_x = Math.random() * canvas.width;
         let rand_y = Math.random() * canvas.height;
-        targets.push(new Target(rand_x, rand_y));
+        new_target = new Target(rand_x, rand_y)
+        targets.push(new_target);
+        if (mode == 1) {
+            vectorFieldWavefront(new_target.x, new_target.y, new_target.index);
+        }
     }
 }
 
@@ -252,10 +264,47 @@ function aStarPathfind(x1, y1, x2, y2) {
     }
 }
 
-function vectorFieldWavefront(target_x, target_y) {
-    let target_node = pointToGraph(target_x,target_y);
-    
-    open = new Array();
+function vectorFieldWavefront(target_x, target_y, target_index) {
+    let target_node = pointToGraph(target_x, target_y);
+
+    let open = new Array();
+    let closed = new Array();
+
+    target_node.target_distances[target_index] = 0;
+
+    open.push(target_node);
+    closed.push(target_node);
+
+    while (open.length > 0) {
+        let current_node = open[0];
+        open.splice(0,1);
+
+        getNeighbors(current_node).forEach((neighbor) => {
+            if (closed.indexOf(neighbor) != -1) {
+                return;
+            }
+            neighbor.target_distances[target_index] = current_node.target_distances[target_index] + 1;
+            closed.push(neighbor);
+            open.push(neighbor);
+        });
+    }
+
+    graph.forEach((column) => {
+        column.forEach((node) => {
+            let neighbors = getNeighbors(node);
+            let nearest_neighbor = neighbors[0];
+            neighbors.forEach((neighbor) => {
+                if (neighbor.target_distances[target_index] < nearest_neighbor.target_distances[target_index]) {
+                    nearest_neighbor = neighbor;
+                }
+            });
+            let x_dist = nearest_neighbor.x - node.x;
+            let y_dist = nearest_neighbor.y - node.y;
+            let direction_vector = normalize(x_dist, y_dist);
+            node.vectors[target_index] = new Vector(direction_vector.x, direction_vector.y);
+        });
+    });
+
 }
 
 function getNeighbors(node) {

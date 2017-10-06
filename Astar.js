@@ -1,11 +1,12 @@
 // 0 - A*
 // 1 - Vector Field
-let mode = 1;
+let mode = 0;
+let debug = false;
 
 let stage;
 let canvas;
-let population = 1000;
-let target_count = 10;
+let population = 100;
+let target_count = 1;
 let graph_width = 50;
 let graph_height = 50;
 
@@ -15,6 +16,8 @@ let units = new Array();
 
 let targets = new Array();
 
+let debug_shapes = new Array();
+
 class GraphNode {
     constructor(x, y, x_index, y_index) {
         this.x = x;
@@ -22,6 +25,10 @@ class GraphNode {
 
         this.x_index = x_index;
         this.y_index = y_index;
+
+        this.obstacle = false;
+        this.shape = null;
+
 
         if (mode == 0) {
             this.g_score = Math.POSITIVE_INFINITY;
@@ -33,6 +40,21 @@ class GraphNode {
             this.vectors = new Array(target_count);
             this.target_distances = new Array(target_count);
         }
+    }
+
+    click() {
+        this.obstacle = true;
+
+        let x_scale = canvas.width / graph_width;
+        let y_scale = canvas.height / graph_height;
+
+        this.shape = new createjs.Shape()
+        this.shape.graphics.beginFill("white").rect(-x_scale / 2, -y_scale / 2, x_scale, y_scale);
+
+        this.shape.x = this.x;
+        this.shape.y = this.y;
+
+        stage.addChild(this.shape);
     }
 }
 
@@ -73,6 +95,7 @@ class Unit {
                 }
             }
         }
+
         if (mode == 1) {
             let current_node = pointToGraph(this.x, this.y);
             let direction_vector = current_node.vectors[this.target.index];
@@ -118,6 +141,22 @@ $(document).ready(function () {
     initTargets();
 
     createjs.Ticker.addEventListener("tick", handleTick);
+
+    $(canvas).mousedown((e) => {
+        pointToGraph(e.pageX, e.pageY).click();
+
+        if (mode == 1) {
+            if (debug) {
+                debug_shapes.forEach((shape) => {
+                    stage.removeChild(shape)
+                })
+            }
+            targets.forEach((target) => {
+                vectorFieldWavefront(target.x, target.y, target.index);
+            })
+        }
+
+    })
 });
 
 function initCanvas() {
@@ -277,13 +316,17 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
 
     while (open.length > 0) {
         let current_node = open[0];
-        open.splice(0,1);
+        open.splice(0, 1);
 
         getNeighbors(current_node).forEach((neighbor) => {
             if (closed.indexOf(neighbor) != -1) {
                 return;
             }
-            neighbor.target_distances[target_index] = current_node.target_distances[target_index] + 1;
+            if (neighbor.obstacle) {
+                neighbor.target_distances[target_index] = Math.POSITIVE_INFINITY
+            } else {
+                neighbor.target_distances[target_index] = current_node.target_distances[target_index] + 1;
+            }
             closed.push(neighbor);
             open.push(neighbor);
         });
@@ -300,8 +343,26 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
             });
             let x_dist = nearest_neighbor.x - node.x;
             let y_dist = nearest_neighbor.y - node.y;
-            let direction_vector = normalize(x_dist, y_dist);
+            let direction_vector;
+            if (node.target_distances[target_index] == 0) {
+                direction_vector = new Vector(0, 0)
+            } else {
+                direction_vector = normalize(x_dist, y_dist);
+            }
             node.vectors[target_index] = new Vector(direction_vector.x, direction_vector.y);
+
+            if (debug) {
+                var line = new createjs.Shape();
+                line.graphics.setStrokeStyle(1);
+                line.graphics.beginStroke("white");
+                line.graphics.moveTo(node.x, node.y);
+                line.graphics.lineTo(node.x + (direction_vector.x * 6), node.y + (direction_vector.y) * 6);
+                line.graphics.endStroke();
+
+                stage.addChild(line)
+                debug_shapes.push(line)
+            }
+
         });
     });
 

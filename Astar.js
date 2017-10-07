@@ -1,7 +1,7 @@
 // 0 - A*
 // 1 - Vector Field
-let mode = 0;
-let debug = false;
+let mode = 1;
+let debug = true;
 
 let stage;
 let canvas;
@@ -318,7 +318,7 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
         let current_node = open[0];
         open.splice(0, 1);
 
-        getNeighbors(current_node).forEach((neighbor) => {
+        getAdjacent(current_node).forEach((neighbor) => {
             if (closed.indexOf(neighbor) != -1) {
                 return;
             }
@@ -361,6 +361,12 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
 
                 stage.addChild(line)
                 debug_shapes.push(line)
+
+//                var text = new createjs.Text(node.target_distances[target_index], "bold 16px Arial", "white");
+//                text.x = node.x;
+//                text.y = node.y;
+//                stage.addChild(text)
+//                debug_shapes.push(text)
             }
 
         });
@@ -385,6 +391,29 @@ function getNeighbors(node) {
         }
     }
     return neighbors;
+}
+
+function getAdjacent(node) {
+    let adjacent = new Array();
+    for (let x_shift = -1; x_shift <= 1; x_shift++) {
+        if (node.x_index + x_shift < 0 || node.x_index + x_shift >= graph_width) {
+            continue;
+        }
+        if (x_shift == 0) {
+            continue;
+        }
+        adjacent.push(graph[node.x_index + x_shift][node.y_index]);
+    }
+    for (let y_shift = -1; y_shift <= 1; y_shift++) {
+        if (node.y_index + y_shift < 0 || node.y_index + y_shift >= graph_height) {
+            continue;
+        }
+        if (y_shift == 0) {
+            continue;
+        }
+        adjacent.push(graph[node.x_index][node.y_index + y_shift]);
+    }
+    return adjacent;
 }
 
 function pythagorean(x1, y1, x2, y2) {

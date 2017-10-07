@@ -322,11 +322,8 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
             if (closed.indexOf(neighbor) != -1) {
                 return;
             }
-            if (neighbor.obstacle) {
-                neighbor.target_distances[target_index] = Math.POSITIVE_INFINITY
-            } else {
-                neighbor.target_distances[target_index] = current_node.target_distances[target_index] + 1;
-            }
+            neighbor.target_distances[target_index] = current_node.target_distances[target_index] + 1;
+
             closed.push(neighbor);
             open.push(neighbor);
         });
@@ -362,11 +359,11 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
                 stage.addChild(line)
                 debug_shapes.push(line)
 
-//                var text = new createjs.Text(node.target_distances[target_index], "bold 16px Arial", "white");
-//                text.x = node.x;
-//                text.y = node.y;
-//                stage.addChild(text)
-//                debug_shapes.push(text)
+                //                var text = new createjs.Text(node.target_distances[target_index], "12px Arial", "white");
+                //                text.x = node.x;
+                //                text.y = node.y;
+                //                stage.addChild(text)
+                //                debug_shapes.push(text)
             }
 
         });
@@ -390,7 +387,9 @@ function getNeighbors(node) {
             neighbors.push(graph[node.x_index + x_shift][node.y_index + y_shift]);
         }
     }
-    return neighbors;
+    return neighbors.filter((node) => {
+        return !node.obstacle;
+    });
 }
 
 function getAdjacent(node) {
@@ -413,7 +412,9 @@ function getAdjacent(node) {
         }
         adjacent.push(graph[node.x_index][node.y_index + y_shift]);
     }
-    return adjacent;
+    return adjacent.filter((node) => {
+        return !node.obstacle;
+    });
 }
 
 function pythagorean(x1, y1, x2, y2) {

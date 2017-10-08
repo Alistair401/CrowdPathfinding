@@ -155,7 +155,7 @@ $(document).ready(function () {
                 vectorFieldWavefront(target.x, target.y, target.index);
             })
         }
-        if (mode == 0){
+        if (mode == 0) {
             units.forEach((unit) => {
                 unit.path = aStarPathfind(unit.x, unit.y, unit.target.x, unit.target.y)
             })
@@ -354,7 +354,7 @@ function vectorFieldWavefront(target_x, target_y, target_index) {
             node.vectors[target_index] = new Vector(direction_vector.x, direction_vector.y);
 
             if (debug) {
-                var line = new createjs.Shape();
+                let line = new createjs.Shape();
                 line.graphics.setStrokeStyle(1);
                 line.graphics.beginStroke("white");
                 line.graphics.moveTo(node.x, node.y);

@@ -1,12 +1,12 @@
 // 0 - A*
 // 1 - Vector Field
-let mode = 1;
-let debug = true;
+let mode = 0;
+let debug = false;
 
 let stage;
 let canvas;
 let population = 100;
-let target_count = 1;
+let target_count = 10;
 let graph_width = 50;
 let graph_height = 50;
 
@@ -153,6 +153,11 @@ $(document).ready(function () {
             }
             targets.forEach((target) => {
                 vectorFieldWavefront(target.x, target.y, target.index);
+            })
+        }
+        if (mode == 0){
+            units.forEach((unit) => {
+                unit.path = aStarPathfind(unit.x, unit.y, unit.target.x, unit.target.y)
             })
         }
 

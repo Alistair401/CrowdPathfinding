@@ -1,9 +1,11 @@
 let stage;
 let canvas;
 let population = 100;
-let boid_radius = 100;
+let boid_radius = 200;
 
 let boids = new Array();
+
+let debug_shapes = new Array();
 
 class Boid {
     constructor(x, y) {
@@ -38,6 +40,10 @@ class Boid {
             }
         });
 
+        if (flockmates.length == 0) {
+            return;
+        }
+
         // A
         let local_avoidance_vector = new Vector(0, 0);
 
@@ -64,18 +70,49 @@ class Boid {
         let average_position_vector = new Vector(0, 0);
 
         flockmates.forEach((flockmate) => {
-            average_position_vector.x += flockmate.x;
-            average_position_vector.y += flockmate.y;
+            average_position_vector.x += flockmate.x - this.x;
+            average_position_vector.y += flockmate.y - this.y;
         });
 
         average_position_vector.x /= flockmates.length;
         average_position_vector.y /= flockmates.length;
 
-        let direction_vector = new Vector(local_avoidance_vector.x + average_heading_vector.x + average_position_vector.x, local_avoidance_vector.y + average_heading_vector.y + average_position_vector.y);
+        this.heading = new Vector(local_avoidance_vector.x + average_heading_vector.x + average_position_vector.x, local_avoidance_vector.y + average_heading_vector.y + average_position_vector.y);
+        
+        this.heading.x = Math.max(Math.min(this.heading.x,1),-1);
+        this.heading.y = Math.max(Math.min(this.heading.y,1),-1);
+        
+        this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
 
-        direction_vector = normalize(direction_vector);
+        let a = new createjs.Shape();
+        a.graphics.setStrokeStyle(1);
+        a.graphics.beginStroke("white");
+        a.graphics.moveTo(this.x, this.y);
+        a.graphics.lineTo(this.x + local_avoidance_vector.x, this.y + local_avoidance_vector.y);
+        a.graphics.endStroke();
 
-        this.updatePosition(this.x + direction_vector.x, this.y + direction_vector.y);
+        stage.addChild(a)
+        debug_shapes.push(a)
+
+        let b = new createjs.Shape();
+        b.graphics.setStrokeStyle(1);
+        b.graphics.beginStroke("blue");
+        b.graphics.moveTo(this.x, this.y);
+        b.graphics.lineTo(this.x + average_heading_vector.x, this.y + average_heading_vector.y);
+        b.graphics.endStroke();
+
+        stage.addChild(b)
+        debug_shapes.push(b)
+
+        let c = new createjs.Shape();
+        c.graphics.setStrokeStyle(1);
+        c.graphics.beginStroke("yellow");
+        c.graphics.moveTo(this.x, this.y);
+        c.graphics.lineTo(this.x + average_position_vector.x, this.y + average_position_vector.y);
+        c.graphics.endStroke();
+
+        stage.addChild(c)
+        debug_shapes.push(c)
 
     }
 
@@ -130,6 +167,11 @@ function handleTick() {
     })
 
     stage.update();
+
+    debug_shapes.forEach((shape) => {
+        stage.removeChild(shape)
+    });
+    debug_shapes = new Array();
 }
 
 function pythagorean(x1, y1, x2, y2) {

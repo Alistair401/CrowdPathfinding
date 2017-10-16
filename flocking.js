@@ -1,7 +1,12 @@
 let stage;
 let canvas;
 let population = 100;
-let boid_radius = 200;
+let boid_radius = 75;
+let cohesion_factor = 1.25;
+let separation_factor = 1;
+let alignment_factor = 0.5;
+let debug = false;
+
 
 let boids = new Array();
 
@@ -45,75 +50,82 @@ class Boid {
         }
 
         // A
-        let local_avoidance_vector = new Vector(0, 0);
+        let separation_vector = new Vector(0, 0);
 
         flockmates.forEach((flockmate) => {
-            local_avoidance_vector.x += flockmate.x - this.x;
-            local_avoidance_vector.y += flockmate.y - this.y;
+            separation_vector.x += flockmate.x - this.x;
+            separation_vector.y += flockmate.y - this.y;
         });
 
-        local_avoidance_vector.x *= -1;
-        local_avoidance_vector.y *= -1;
+        separation_vector.x *= -1;
+        separation_vector.y *= -1;
+        separation_vector = normalize(separation_vector);
+        separation_vector = multiplyVector(separation_vector, separation_factor);
 
         // B 
-        let average_heading_vector = new Vector(0, 0);
+        let alignment_vector = new Vector(0, 0);
 
         flockmates.forEach((flockmate) => {
-            average_heading_vector.x += flockmate.heading.x;
-            average_heading_vector.y += flockmate.heading.y;
+            alignment_vector.x += flockmate.heading.x;
+            alignment_vector.y += flockmate.heading.y;
         });
 
-        average_heading_vector.x /= flockmates.length;
-        average_heading_vector.y /= flockmates.length;
+        alignment_vector.x /= flockmates.length;
+        alignment_vector.y /= flockmates.length;
+        alignment_vector = normalize(alignment_vector);
+        alignment_vector = multiplyVector(alignment_vector, alignment_factor);
 
         // C
-        let average_position_vector = new Vector(0, 0);
+        let cohesion_vector = new Vector(0, 0);
 
         flockmates.forEach((flockmate) => {
-            average_position_vector.x += flockmate.x - this.x;
-            average_position_vector.y += flockmate.y - this.y;
+            cohesion_vector.x += flockmate.x;
+            cohesion_vector.y += flockmate.y;
         });
 
-        average_position_vector.x /= flockmates.length;
-        average_position_vector.y /= flockmates.length;
+        cohesion_vector.x /= flockmates.length;
+        cohesion_vector.y /= flockmates.length;
+        cohesion_vector.x -= this.x;
+        cohesion_vector.y -= this.y;
+        cohesion_vector = normalize(cohesion_vector);
+        cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor)
 
-        this.heading = new Vector(local_avoidance_vector.x + average_heading_vector.x + average_position_vector.x, local_avoidance_vector.y + average_heading_vector.y + average_position_vector.y);
-        
-        this.heading.x = Math.max(Math.min(this.heading.x,1),-1);
-        this.heading.y = Math.max(Math.min(this.heading.y,1),-1);
-        
+        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.x);
+        this.heading = normalize(this.heading);
+
         this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
 
-        let a = new createjs.Shape();
-        a.graphics.setStrokeStyle(1);
-        a.graphics.beginStroke("white");
-        a.graphics.moveTo(this.x, this.y);
-        a.graphics.lineTo(this.x + local_avoidance_vector.x, this.y + local_avoidance_vector.y);
-        a.graphics.endStroke();
+        if (debug) {
+            let a = new createjs.Shape();
+            a.graphics.setStrokeStyle(1);
+            a.graphics.beginStroke("white");
+            a.graphics.moveTo(this.x, this.y);
+            a.graphics.lineTo(this.x + separation_vector.x, this.y + separation_vector.y);
+            a.graphics.endStroke();
 
-        stage.addChild(a)
-        debug_shapes.push(a)
+            stage.addChild(a)
+            debug_shapes.push(a)
 
-        let b = new createjs.Shape();
-        b.graphics.setStrokeStyle(1);
-        b.graphics.beginStroke("blue");
-        b.graphics.moveTo(this.x, this.y);
-        b.graphics.lineTo(this.x + average_heading_vector.x, this.y + average_heading_vector.y);
-        b.graphics.endStroke();
+            let b = new createjs.Shape();
+            b.graphics.setStrokeStyle(1);
+            b.graphics.beginStroke("blue");
+            b.graphics.moveTo(this.x, this.y);
+            b.graphics.lineTo(this.x + alignment_vector.x, this.y + alignment_vector.y);
+            b.graphics.endStroke();
 
-        stage.addChild(b)
-        debug_shapes.push(b)
+            stage.addChild(b)
+            debug_shapes.push(b)
 
-        let c = new createjs.Shape();
-        c.graphics.setStrokeStyle(1);
-        c.graphics.beginStroke("yellow");
-        c.graphics.moveTo(this.x, this.y);
-        c.graphics.lineTo(this.x + average_position_vector.x, this.y + average_position_vector.y);
-        c.graphics.endStroke();
+            let c = new createjs.Shape();
+            c.graphics.setStrokeStyle(1);
+            c.graphics.beginStroke("yellow");
+            c.graphics.moveTo(this.x, this.y);
+            c.graphics.lineTo(this.x + cohesion_vector.x, this.y + cohesion_vector.y);
+            c.graphics.endStroke();
 
-        stage.addChild(c)
-        debug_shapes.push(c)
-
+            stage.addChild(c)
+            debug_shapes.push(c)
+        }
     }
 
     updatePosition(x, y) {
@@ -182,6 +194,17 @@ function pythagorean(x1, y1, x2, y2) {
 
 function normalize(v) {
     let abs = Math.pow(v.x, 2) + Math.pow(v.y, 2);
+    if (abs == 0) {
+        return v;
+    }
     abs = Math.sqrt(abs);
     return new Vector(v.x / abs, v.y / abs);
+}
+
+function clamp(x, min, max) {
+    return Math.max(Math.min(x, max), min);
+}
+
+function multiplyVector(v, x) {
+    return new Vector(v.x * x, v.y * x)
 }

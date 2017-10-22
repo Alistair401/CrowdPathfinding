@@ -1,10 +1,11 @@
 let population = 100;
 let boid_radius = 75;
 let target_count = 10;
-let cohesion_factor = 0;
-let separation_factor = 0;
-let alignment_factor = 0;
-let debug = false;
+let cohesion_factor = 10;
+let separation_factor = 10;
+let alignment_factor = 10;
+let target_factor = 15;
+let debug = true;
 
 let stage;
 let canvas;
@@ -38,6 +39,8 @@ class Boid {
         
         let target_distance = pythagorean(this.x,this.y,this.target.x,this.target.y);
         let target_vector = new Vector(this.target.x - this.x, this.target.y - this.y);
+        target_vector = normalize(target_vector);
+        target_vector = multiplyVector(target_vector, target_factor)
 
         // Get local flockmates
         // A) Steer to avoid local flockmates
@@ -103,7 +106,8 @@ class Boid {
         cohesion_vector = normalize(cohesion_vector);
         cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor)
 
-        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.x);
+        // Simple summation of all weighted vectors (and the original heading to give a sense of momentum)
+        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.x + target_vector.y);
         this.heading = normalize(this.heading);
 
         this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
@@ -232,11 +236,10 @@ function pythagorean(x1, y1, x2, y2) {
 }
 
 function normalize(v) {
-    let abs = Math.pow(v.x, 2) + Math.pow(v.y, 2);
-    if (abs == 0) {
+    let abs = magnitude(v);
+    if (abs == 0){
         return v;
     }
-    abs = Math.sqrt(abs);
     return new Vector(v.x / abs, v.y / abs);
 }
 
@@ -252,4 +255,12 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function magnitude(v){
+    let abs = Math.pow(v.x, 2) + Math.pow(v.y, 2);
+    if (abs == 0) {
+        return 0;
+    }
+    return Math.sqrt(abs);
 }

@@ -1,11 +1,15 @@
-let population = 100;
+let population = 1;
 let boid_radius = 75;
 let target_count = 10;
-let cohesion_factor = 10;
-let separation_factor = 10;
-let alignment_factor = 10;
-let target_factor = 15;
-let debug = true;
+let cohesion_factor = 1;
+let separation_factor = 1;
+let alignment_factor = 1;
+let target_factor = 2;
+let heading_factor = 4;
+
+let graph = [];
+let graph_width = 50;
+let graph_height = 50;
 
 let stage;
 let canvas;
@@ -14,8 +18,6 @@ let targets = [];
 
 let boids = [];
 
-let debug_shapes = [];
-
 class Boid {
     constructor(x, y) {
         this.x = x;
@@ -23,9 +25,12 @@ class Boid {
 
         let target_index = getRandomInt(0, target_count);
         this.target = targets[target_index];
+        this.path = [];
 
-        this.heading = normalize(new Vector(this.target.x - this.x, this.target.y - this.y));
-        
+        this.heading = new Vector(0, 0);
+
+        this.flockmates = [];
+
         this.shape = new createjs.Shape();
         this.shape.graphics.beginFill("red").drawCircle(0, 0, 8);
 
@@ -36,41 +41,39 @@ class Boid {
     }
 
     update() {
-        
-        let target_distance = pythagorean(this.x,this.y,this.target.x,this.target.y);
-        let target_vector = new Vector(this.target.x - this.x, this.target.y - this.y);
-        target_vector = normalize(target_vector);
-        target_vector = multiplyVector(target_vector, target_factor);
 
         // Get local flockmates
         // A) Steer to avoid local flockmates
         // B) Steer towards the average heading of local flockmates
         // C) Steer to move towards the average position of flockmates
 
-        let flockmates = [];
+        this.updateFlockmates();
+        let path_vector = this.getPathVector();
+        this.heading = multiplyVector(this.heading, heading_factor);
 
-        boids.forEach((boid) => {
-            if (boid == this) {
-                return;
-            }
-            if (pythagorean(this.x, this.y, boid.x, boid.y) < boid_radius) {
-                flockmates.push(boid);
-            }
-        });
 
-        if (flockmates.length == 0) {
+        if (this.flockmates.length === 0) {
+            this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
+            this.heading = new Vector(this.heading.x + path_vector.x, this.heading.y + path_vector.y);
+            this.heading = normalize(this.heading);
+
             this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
             return;
         }
 
-        // A
         let separation_vector = new Vector(0, 0);
+        let alignment_vector = new Vector(0, 0);
+        let cohesion_vector = new Vector(0, 0);
 
-        flockmates.forEach((flockmate) => {
+        this.flockmates.forEach((flockmate) => {
             if (pythagorean(this.x, this.y, flockmate.x, flockmate.y) < boid_radius / 2) {
                 separation_vector.x += flockmate.x - this.x;
                 separation_vector.y += flockmate.y - this.y;
             }
+            alignment_vector.x += flockmate.heading.x;
+            alignment_vector.y += flockmate.heading.y;
+            cohesion_vector.x += flockmate.x;
+            cohesion_vector.y += flockmate.y;
         });
 
         separation_vector.x *= -1;
@@ -78,37 +81,21 @@ class Boid {
         separation_vector = normalize(separation_vector);
         separation_vector = multiplyVector(separation_vector, separation_factor);
 
-        // B 
-        let alignment_vector = new Vector(0, 0);
-
-        flockmates.forEach((flockmate) => {
-            alignment_vector.x += flockmate.heading.x;
-            alignment_vector.y += flockmate.heading.y;
-        });
-
-        alignment_vector.x /= flockmates.length;
-        alignment_vector.y /= flockmates.length;
+        alignment_vector.x /= this.flockmates.length;
+        alignment_vector.y /= this.flockmates.length;
         alignment_vector = normalize(alignment_vector);
         alignment_vector = multiplyVector(alignment_vector, alignment_factor);
 
-        // C
-        let cohesion_vector = new Vector(0, 0);
-
-        flockmates.forEach((flockmate) => {
-            cohesion_vector.x += flockmate.x;
-            cohesion_vector.y += flockmate.y;
-        });
-
-        cohesion_vector.x /= flockmates.length;
-        cohesion_vector.y /= flockmates.length;
+        cohesion_vector.x /= this.flockmates.length;
+        cohesion_vector.y /= this.flockmates.length;
         cohesion_vector.x -= this.x;
         cohesion_vector.y -= this.y;
         cohesion_vector = normalize(cohesion_vector);
         cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor);
 
         // Simple summation of all weighted vectors (and the original heading to give a sense of momentum)
-        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + target_vector.y);
-        this.heading = normalize(this.heading);
+        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + path_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + path_vector.y);
+        this.heading.x = normalize(this.heading);
 
         this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
     }
@@ -118,6 +105,27 @@ class Boid {
         this.y = y;
         this.shape.x = x;
         this.shape.y = y;
+    }
+
+    updateFlockmates() {
+        for (let boid of boids) {
+            if (boid === this) {
+                continue;
+            }
+            if (pythagorean(this.x, this.y, boid.x, boid.y) < boid_radius) {
+                this.flockmates.push(boid);
+            }
+        }
+    }
+
+    getPathVector() {
+        if (this.path.length === 0) {
+            return new Vector(0, 0)
+        }
+        let target_vector = new Vector(this.path[0].x - this.x, this.path[0].y - this.y);
+        target_vector = normalize(target_vector);
+        target_vector = multiplyVector(target_vector, target_factor);
+        return target_vector;
     }
 }
 
@@ -134,17 +142,12 @@ class Target {
         stage.addChild(this.shape);
     }
 }
-Target.count = 0;
 
-class Vector {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
+Target.count = 0;
 
 $(document).ready(() => {
     initCanvas();
+    initGraph();
     initTargets();
     initBoids();
 
@@ -167,7 +170,7 @@ function initTargets() {
     for (let i = 0; i < target_count; i++) {
         let rand_x = Math.random() * canvas.width;
         let rand_y = Math.random() * canvas.height;
-        new_target = new Target(rand_x, rand_y);
+        let new_target = new Target(rand_x, rand_y);
         targets.push(new_target);
     }
 }
@@ -180,6 +183,17 @@ function initBoids() {
     }
 }
 
+function initGraph() {
+    let x_scale = canvas.width / graph_width;
+    let y_scale = canvas.height / graph_height;
+    for (let x = 0; x < graph_width; x++) {
+        graph.push([]);
+        for (let y = 0; y < graph_height; y++) {
+            graph[x].push(new GraphNode((x_scale / 2) + (x * x_scale), (y_scale / 2) + (y * y_scale), x, y));
+        }
+    }
+}
+
 function handleTick() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -189,45 +203,18 @@ function handleTick() {
     });
 
     stage.update();
-
-    debug_shapes.forEach((shape) => {
-        stage.removeChild(shape)
-    });
-    debug_shapes = [];
 }
 
-function pythagorean(x1, y1, x2, y2) {
-    let x_distance = x2 - x1;
-    let y_distance = y2 - y1;
-    return Math.sqrt(Math.pow(x_distance, 2) + Math.pow(y_distance, 2));
+function pointToGraph(x, y) {
+    let x_scale = canvas.width / graph_width;
+    let y_scale = canvas.height / graph_height;
+
+    let x_val = Math.round(((x - (x_scale / 2)) / canvas.width) * graph_width);
+    let y_val = Math.round(((y - (y_scale / 2)) / canvas.height) * graph_height);
+
+    x_val = clamp(x_val, 0, graph_width - 1);
+    y_val = clamp(y_val, 0, graph_height - 1);
+    return graph[x_val][y_val];
 }
 
-function normalize(v) {
-    let abs = magnitude(v);
-    if (abs == 0){
-        return v;
-    }
-    return new Vector(v.x / abs, v.y / abs);
-}
 
-function clamp(x, min, max) {
-    return Math.max(Math.min(x, max), min);
-}
-
-function multiplyVector(v, x) {
-    return new Vector(v.x * x, v.y * x)
-}
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function magnitude(v){
-    let abs = Math.pow(v.x, 2) + Math.pow(v.y, 2);
-    if (abs == 0) {
-        return 0;
-    }
-    return Math.sqrt(abs);
-}

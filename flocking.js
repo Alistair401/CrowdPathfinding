@@ -10,11 +10,11 @@ let debug = true;
 let stage;
 let canvas;
 
-let targets = new Array();
+let targets = [];
 
-let boids = new Array();
+let boids = [];
 
-let debug_shapes = new Array();
+let debug_shapes = [];
 
 class Boid {
     constructor(x, y) {
@@ -26,7 +26,7 @@ class Boid {
 
         this.heading = normalize(new Vector(this.target.x - this.x, this.target.y - this.y));
         
-        this.shape = new createjs.Shape()
+        this.shape = new createjs.Shape();
         this.shape.graphics.beginFill("red").drawCircle(0, 0, 8);
 
         this.shape.x = this.x;
@@ -40,14 +40,14 @@ class Boid {
         let target_distance = pythagorean(this.x,this.y,this.target.x,this.target.y);
         let target_vector = new Vector(this.target.x - this.x, this.target.y - this.y);
         target_vector = normalize(target_vector);
-        target_vector = multiplyVector(target_vector, target_factor)
+        target_vector = multiplyVector(target_vector, target_factor);
 
         // Get local flockmates
         // A) Steer to avoid local flockmates
         // B) Steer towards the average heading of local flockmates
         // C) Steer to move towards the average position of flockmates
 
-        let flockmates = new Array();
+        let flockmates = [];
 
         boids.forEach((boid) => {
             if (boid == this) {
@@ -104,45 +104,13 @@ class Boid {
         cohesion_vector.x -= this.x;
         cohesion_vector.y -= this.y;
         cohesion_vector = normalize(cohesion_vector);
-        cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor)
+        cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor);
 
         // Simple summation of all weighted vectors (and the original heading to give a sense of momentum)
         this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + target_vector.y);
         this.heading = normalize(this.heading);
 
         this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
-
-        if (debug) {
-            let a = new createjs.Shape();
-            a.graphics.setStrokeStyle(1);
-            a.graphics.beginStroke("white");
-            a.graphics.moveTo(this.x, this.y);
-            a.graphics.lineTo(this.x + separation_vector.x, this.y + separation_vector.y);
-            a.graphics.endStroke();
-
-            stage.addChild(a)
-            debug_shapes.push(a)
-
-            let b = new createjs.Shape();
-            b.graphics.setStrokeStyle(1);
-            b.graphics.beginStroke("blue");
-            b.graphics.moveTo(this.x, this.y);
-            b.graphics.lineTo(this.x + alignment_vector.x, this.y + alignment_vector.y);
-            b.graphics.endStroke();
-
-            stage.addChild(b)
-            debug_shapes.push(b)
-
-            let c = new createjs.Shape();
-            c.graphics.setStrokeStyle(1);
-            c.graphics.beginStroke("yellow");
-            c.graphics.moveTo(this.x, this.y);
-            c.graphics.lineTo(this.x + cohesion_vector.x, this.y + cohesion_vector.y);
-            c.graphics.endStroke();
-
-            stage.addChild(c)
-            debug_shapes.push(c)
-        }
     }
 
     updatePosition(x, y) {
@@ -158,9 +126,8 @@ class Target {
         this.index = Target.count++;
         this.x = x;
         this.y = y;
-        this.shape = new createjs.Shape()
-        this.shape.graphics.beginFill("yellow").drawPolyStar(0, 0, 8, 5, 0.6, -90);;
-
+        this.shape = new createjs.Shape();
+        this.shape.graphics.beginFill("yellow").drawPolyStar(0, 0, 8, 5, 0.6, -90);
         this.shape.x = this.x;
         this.shape.y = this.y;
 
@@ -200,7 +167,7 @@ function initTargets() {
     for (let i = 0; i < target_count; i++) {
         let rand_x = Math.random() * canvas.width;
         let rand_y = Math.random() * canvas.height;
-        new_target = new Target(rand_x, rand_y)
+        new_target = new Target(rand_x, rand_y);
         targets.push(new_target);
     }
 }
@@ -219,14 +186,14 @@ function handleTick() {
 
     boids.forEach((boid) => {
         boid.update();
-    })
+    });
 
     stage.update();
 
     debug_shapes.forEach((shape) => {
         stage.removeChild(shape)
     });
-    debug_shapes = new Array();
+    debug_shapes = [];
 }
 
 function pythagorean(x1, y1, x2, y2) {

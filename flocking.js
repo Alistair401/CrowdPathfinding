@@ -107,7 +107,7 @@ class Boid {
         cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor)
 
         // Simple summation of all weighted vectors (and the original heading to give a sense of momentum)
-        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.x + target_vector.y);
+        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + target_vector.y);
         this.heading = normalize(this.heading);
 
         this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);

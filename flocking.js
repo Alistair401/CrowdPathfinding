@@ -1,11 +1,12 @@
-let population = 1;
+let population = 100;
 let boid_radius = 75;
 let target_count = 10;
-let cohesion_factor = 1;
-let separation_factor = 1;
-let alignment_factor = 1;
-let target_factor = 2;
-let heading_factor = 4;
+
+let cohesion_factor = 0.2;
+let separation_factor = 0.2;
+let alignment_factor = 0.2;
+let target_factor = 0.4;
+let heading_factor = 0.8;
 
 let graph = [];
 let graph_width = 50;
@@ -25,7 +26,6 @@ class Boid {
 
         let target_index = getRandomInt(0, target_count);
         this.target = targets[target_index];
-        this.path = [];
 
         this.heading = new Vector(0, 0);
 
@@ -42,62 +42,54 @@ class Boid {
 
     update() {
 
-        // Get local flockmates
-        // A) Steer to avoid local flockmates
-        // B) Steer towards the average heading of local flockmates
-        // C) Steer to move towards the average position of flockmates
-
-        this.updateFlockmates();
-        let path_vector = this.getPathVector();
         this.heading = multiplyVector(this.heading, heading_factor);
-
-
-        if (this.flockmates.length === 0) {
-            this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
-            this.heading = new Vector(this.heading.x + path_vector.x, this.heading.y + path_vector.y);
-            this.heading = normalize(this.heading);
-
-            this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
-            return;
-        }
-
+        let target_vector = this.getTargetVector();
         let separation_vector = new Vector(0, 0);
         let alignment_vector = new Vector(0, 0);
         let cohesion_vector = new Vector(0, 0);
 
-        this.flockmates.forEach((flockmate) => {
-            if (pythagorean(this.x, this.y, flockmate.x, flockmate.y) < boid_radius / 2) {
-                separation_vector.x += flockmate.x - this.x;
-                separation_vector.y += flockmate.y - this.y;
-            }
-            alignment_vector.x += flockmate.heading.x;
-            alignment_vector.y += flockmate.heading.y;
-            cohesion_vector.x += flockmate.x;
-            cohesion_vector.y += flockmate.y;
-        });
+        this.updateFlockmates();
 
-        separation_vector.x *= -1;
-        separation_vector.y *= -1;
-        separation_vector = normalize(separation_vector);
-        separation_vector = multiplyVector(separation_vector, separation_factor);
+        if (this.flockmates.length > 0) {
+            this.flockmates.forEach((flockmate) => {
+                if (pythagorean(this.x, this.y, flockmate.x, flockmate.y) < boid_radius / 2) {
+                    separation_vector.x += flockmate.x - this.x;
+                    separation_vector.y += flockmate.y - this.y;
+                }
+                alignment_vector.x += flockmate.heading.x;
+                alignment_vector.y += flockmate.heading.y;
+                cohesion_vector.x += flockmate.x;
+                cohesion_vector.y += flockmate.y;
+            });
 
-        alignment_vector.x /= this.flockmates.length;
-        alignment_vector.y /= this.flockmates.length;
-        alignment_vector = normalize(alignment_vector);
-        alignment_vector = multiplyVector(alignment_vector, alignment_factor);
+            separation_vector.x *= -1;
+            separation_vector.y *= -1;
+            separation_vector = normalize(separation_vector);
+            separation_vector = multiplyVector(separation_vector, separation_factor);
 
-        cohesion_vector.x /= this.flockmates.length;
-        cohesion_vector.y /= this.flockmates.length;
-        cohesion_vector.x -= this.x;
-        cohesion_vector.y -= this.y;
-        cohesion_vector = normalize(cohesion_vector);
-        cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor);
+            alignment_vector.x /= this.flockmates.length;
+            alignment_vector.y /= this.flockmates.length;
+            alignment_vector = normalize(alignment_vector);
+            alignment_vector = multiplyVector(alignment_vector, alignment_factor);
+
+            cohesion_vector.x /= this.flockmates.length;
+            cohesion_vector.y /= this.flockmates.length;
+            cohesion_vector.x -= this.x;
+            cohesion_vector.y -= this.y;
+            cohesion_vector = normalize(cohesion_vector);
+            cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor);
+        }
 
         // Simple summation of all weighted vectors (and the original heading to give a sense of momentum)
-        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + path_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + path_vector.y);
-        this.heading.x = normalize(this.heading);
+        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + target_vector.y);
+        this.heading.x = clamp(this.heading.x, -1, 1);
+        this.heading.y = clamp(this.heading.y, -1, 1);
 
         this.updatePosition(this.x + this.heading.x, this.y + this.heading.y);
+    }
+
+    updateHeading() {
+
     }
 
     updatePosition(x, y) {
@@ -118,11 +110,8 @@ class Boid {
         }
     }
 
-    getPathVector() {
-        if (this.path.length === 0) {
-            return new Vector(0, 0)
-        }
-        let target_vector = new Vector(this.path[0].x - this.x, this.path[0].y - this.y);
+    getTargetVector() {
+        let target_vector = new Vector(this.target.x - this.x, this.target.y - this.y);
         target_vector = normalize(target_vector);
         target_vector = multiplyVector(target_vector, target_factor);
         return target_vector;

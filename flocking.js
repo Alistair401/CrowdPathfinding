@@ -29,8 +29,6 @@ class Boid {
 
         this.heading = new Vector(0, 0);
 
-        this.path = [];
-
         this.flockmates = [];
 
         this.shape = new createjs.Shape();
@@ -45,7 +43,7 @@ class Boid {
     update() {
 
         this.heading = multiplyVector(this.heading, heading_factor);
-        let target_vector = new Vector(0, 0);
+        let target_vector = this.getTargetVector();
         let separation_vector = new Vector(0, 0);
         let alignment_vector = new Vector(0, 0);
         let cohesion_vector = new Vector(0, 0);
@@ -80,20 +78,10 @@ class Boid {
             cohesion_vector.y -= this.y;
             cohesion_vector = normalize(cohesion_vector);
             cohesion_vector = multiplyVector(cohesion_vector, cohesion_factor);
-        } else {
-            if (this.path.length === 0) {
-                let current_node = pointToGraph(this.x, this.y);
-                let target_node = pointToGraph(this.target.x, this.target.y);
-                this.path = aStar(current_node, target_node, graph);
-            }
-            target_vector = this.getPathVector();
         }
 
         // Simple summation of all weighted vectors (and the original heading to give a sense of momentum)
-        this.heading = new Vector(
-            separation_vector.x + alignment_vector.x + cohesion_vector.x + target_vector.x + this.heading.x,
-            separation_vector.y + alignment_vector.y + cohesion_vector.y + target_vector.y + this.heading.y
-        );
+        this.heading = new Vector(separation_vector.x + alignment_vector.x + cohesion_vector.x + this.heading.x + target_vector.x, separation_vector.y + alignment_vector.y + cohesion_vector.y + this.heading.y + target_vector.y);
         this.heading.x = clamp(this.heading.x, -1, 1);
         this.heading.y = clamp(this.heading.y, -1, 1);
 
@@ -122,8 +110,8 @@ class Boid {
         }
     }
 
-    getPathVector() {
-        let target_vector = new Vector(this.path[0].x - this.x, this.path[0].y - this.y);
+    getTargetVector() {
+        let target_vector = new Vector(this.target.x - this.x, this.target.y - this.y);
         target_vector = normalize(target_vector);
         target_vector = multiplyVector(target_vector, target_factor);
         return target_vector;

@@ -37,34 +37,34 @@ class Unit {
             this.target = targets[target_index];
         }
         if (this.path.length == 0 && pythagorean(this.x, this.y, this.target.x, this.target.y > 50)) {
-            // let possible_paths = path_arr.filter((p) => {
-            //     let distance_to_start = pythagorean(this.x, this.y, p[0].x, p[0].y);
-            //     let distance_to_target = pythagorean(this.x, this.y, p[p.length - 1].x, p[p.length - 1].y);
-            //     let direct_distance = pythagorean(this.x, this.y, this.target.x, this.target.y)
-            //     return distance_to_start + distance_to_target < direct_distance;
-            // });
-            // if (possible_paths.length == 0) {
-            //     this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
-            //     if (this.path.length > 0) {
-            //         path_arr.push(this.path.slice(0));
-            //     }
-            // } else {
-            //     let lowest_distance = Number.POSITIVE_INFINITY;
-            //     let closest_path = null;
-            //     possible_paths.forEach((p) => {
-            //         let distance_to_start = pythagorean(this.x, this.y, p[0].x, p[0].y);
-            //         let distance_to_target = pythagorean(this.x, this.y, p[p.length - 1].x, p[p.length - 1].y);
-            //         if (distance_to_start + distance_to_target < lowest_distance) {
-            //             lowest_distance = distance_to_start + distance_to_target;
-            //             closest_path = p;
-            //         }
-            //     });
-            //     let chosen_path = closest_path;
-            //     let path_start = aStar(pointToGraph(this.x, this.y), pointToGraph(chosen_path[0].x, chosen_path[0].y), graph);
-            //     let path_end = aStar(pointToGraph(chosen_path[chosen_path.length - 1].x, chosen_path[chosen_path.length - 1].y), pointToGraph(this.target.x, this.target.y), graph);
-            //     this.path = [...path_start, ...chosen_path, ...path_end];
-            // }
-            this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
+            let possible_paths = path_arr.filter((p) => {
+                let distance_to_start = pythagorean(this.x, this.y, p[0].x, p[0].y);
+                let distance_to_target = pythagorean(this.x, this.y, p[p.length - 1].x, p[p.length - 1].y);
+                let direct_distance = pythagorean(this.x, this.y, this.target.x, this.target.y)
+                return distance_to_start + distance_to_target < direct_distance;
+            });
+            if (possible_paths.length == 0) {
+                this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
+                if (this.path.length > 0) {
+                    path_arr.push(this.path.slice(0));
+                }
+            } else {
+                let lowest_distance = Number.POSITIVE_INFINITY;
+                let closest_path = null;
+                possible_paths.forEach((p) => {
+                    let distance_to_start = pythagorean(this.x, this.y, p[0].x, p[0].y);
+                    let distance_to_target = pythagorean(this.x, this.y, p[p.length - 1].x, p[p.length - 1].y);
+                    if (distance_to_start + distance_to_target < lowest_distance) {
+                        lowest_distance = distance_to_start + distance_to_target;
+                        closest_path = p;
+                    }
+                });
+                let chosen_path = closest_path;
+                let path_start = aStar(pointToGraph(this.x, this.y), pointToGraph(chosen_path[0].x, chosen_path[0].y), graph);
+                let path_end = aStar(pointToGraph(chosen_path[chosen_path.length - 1].x, chosen_path[chosen_path.length - 1].y), pointToGraph(this.target.x, this.target.y), graph);
+                this.path = [...path_start, ...chosen_path, ...path_end];
+            }
+            // this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
         }
         if (this.path.length > 0) {
             let x_dist = this.path[0].x - this.x;

@@ -63,6 +63,7 @@ class Unit {
                 let path_start = aStar(pointToGraph(this.x, this.y), pointToGraph(chosen_path[0].x, chosen_path[0].y), graph);
                 let path_end = aStar(pointToGraph(chosen_path[chosen_path.length - 1].x, chosen_path[chosen_path.length - 1].y), pointToGraph(this.target.x, this.target.y), graph);
                 this.path = [...path_start, ...chosen_path, ...path_end];
+                path_arr.push(this.path.slice(0));
             }
             // this.path = aStar(pointToGraph(this.x, this.y), pointToGraph(this.target.x, this.target.y), graph);
         }
@@ -126,7 +127,6 @@ function handleTick() {
         unit.update();
     })
 
-    console.log(path_arr.length)
     stage.update();
 }
 

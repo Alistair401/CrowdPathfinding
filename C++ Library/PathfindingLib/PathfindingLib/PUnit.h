@@ -6,6 +6,6 @@ class PUnit
 public:
 	PUnit();
 	~PUnit();
-	blaze::StaticVector<float, 3UL> location;
-	void UpdatePosition(blaze::StaticVector<float, 3UL> location);
+	blaze::StaticVector<float, 3UL> position;
+	void UpdatePosition(blaze::StaticVector<float, 3UL> position);
 };

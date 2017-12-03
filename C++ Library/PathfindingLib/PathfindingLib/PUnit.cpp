@@ -11,6 +11,6 @@ PUnit::~PUnit()
 {
 }
 
-void PUnit::UpdatePosition(blaze::StaticVector<float, 3UL> location)
+void PUnit::UpdatePosition(blaze::StaticVector<float, 3UL> position)
 {
 }

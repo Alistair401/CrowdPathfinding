@@ -37,3 +37,6 @@ C++ Library/PathfindingLib/PathfindingLib/Debug/
 C++ Library/PathfindingLib/.vs/
 C++ Library/Examples/Examples/x64/
 C++ Library/Examples/.vs/
+C++ Library/PathfindingLib/Examples/x64/
+*.ilk
+*.pdb

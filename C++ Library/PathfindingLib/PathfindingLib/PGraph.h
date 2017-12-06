@@ -6,7 +6,7 @@
 class PGraph
 {
 public:
-	PGraph(blaze::StaticVector<float, 3UL> origin, blaze::StaticVector<int, 3UL> dimensions, float scale);
+	PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<int, 3UL> dimensions, double scale);
 	~PGraph();
 };
 

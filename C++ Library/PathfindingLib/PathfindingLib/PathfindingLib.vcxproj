@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pathfinding.h" />
+    <ClInclude Include="PathfindingLib.h" />
     <ClInclude Include="PGraph.h" />
     <ClInclude Include="PGraphNode.h" />
     <ClInclude Include="PUnit.h" />
@@ -156,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pathfinding.cpp" />
+    <ClCompile Include="PathfindingLib.cpp" />
     <ClCompile Include="PGraph.cpp" />
     <ClCompile Include="PGraphNode.cpp" />
     <ClCompile Include="PUnit.cpp" />

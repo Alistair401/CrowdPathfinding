@@ -18,16 +18,16 @@ struct IndexVectorHash {
 
 std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>* graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>();
 
-PGraph::PGraph(blaze::StaticVector<float, 3UL> origin, blaze::StaticVector<int, 3UL> dimensions, float scale)
+PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<int, 3UL> dimensions, double scale)
 {
 	int x_index = 0;
 	int	y_index = 0;
 	int z_index = 0;
-	for (float i = origin[0] + (scale / 2.0); i < dimensions[0] + origin[0]; i += scale)
+	for (double i = origin[0] + (scale / 2.0); i < dimensions[0] + origin[0]; i += scale)
 	{
-		for (float j = origin[1] + (scale / 2.0); j < dimensions[1] + origin[1]; j += scale)
+		for (double j = origin[1] + (scale / 2.0); j < dimensions[1] + origin[1]; j += scale)
 		{
-			for (float k = origin[2] + (scale / 2.0); k < dimensions[2] + origin[2]; k += scale)
+			for (double k = origin[2] + (scale / 2.0); k < dimensions[2] + origin[2]; k += scale)
 			{
 				PGraphNode* new_node = new PGraphNode();
 				blaze::StaticVector<int, 3UL> index { x_index, y_index, z_index };
@@ -35,8 +35,10 @@ PGraph::PGraph(blaze::StaticVector<float, 3UL> origin, blaze::StaticVector<int, 
 				z_index++;
 			}
 			y_index++;
+			z_index = 0;
 		}
 		x_index++;
+		y_index = 0;
 	}
 }
 

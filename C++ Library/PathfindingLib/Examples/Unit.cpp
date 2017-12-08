@@ -24,9 +24,10 @@ void Unit::draw(cairo_t * cr)
 
 	cairo_arc(cr, x, y, 5, 0, 2 * 3.14);
 	cairo_stroke(cr);
-	//cairo_stroke_preserve(cr);
-	//cairo_set_source_rgb(cr, 0.3, 0.4, 0.6);
-	//cairo_fill(cr);
+}
+
+void Unit::update()
+{
 }
 
 

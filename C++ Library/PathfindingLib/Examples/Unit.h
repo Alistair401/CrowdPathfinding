@@ -3,9 +3,9 @@
 class Unit : public Drawable
 {
 public:
+	void draw(cairo_t* cr) override;
 	Unit(double x, double y);
 	~Unit();
-	void draw(cairo_t* cr);
 	void update();
 };
 

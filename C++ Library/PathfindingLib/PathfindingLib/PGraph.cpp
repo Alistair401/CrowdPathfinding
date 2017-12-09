@@ -16,7 +16,7 @@ struct IndexVectorHash {
 	}
 };
 
-std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>* graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>();
+std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>* graph;
 
 void add_edge(PGraphNode* a, PGraphNode* b) {
 	a->neighbors.push_back(b);
@@ -25,7 +25,7 @@ void add_edge(PGraphNode* a, PGraphNode* b) {
 
 PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<double, 3UL> dimensions, double scale)
 {
-	// TODO: faster initialization - possibly lazy
+	graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>();
 
 	int x_index = 0;
 	int	y_index = 0;
@@ -61,6 +61,12 @@ PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<doub
 
 PGraph::~PGraph()
 {
-	// TODO: free graph
+	if (graph) {
+		for (auto it = graph->begin(); it != graph->end(); it++)
+		{
+			delete it->second;
+		}
+		delete graph;
+	}
 }
 

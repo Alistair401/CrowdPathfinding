@@ -7,13 +7,24 @@ void add_edge(PGraphNode* a, PGraphNode* b) {
 }
 
 PGraphNode* PGraph::get_node_at(blaze::StaticVector<double, 3UL> position) {
-	int max_x_index = (dimensions[0] / scale);
-	int max_y_index = (dimensions[1] / scale);
-	int max_z_index = (dimensions[2] / scale);
+	int max_x_index = (int)(dimensions[0] / scale);
+	int max_y_index = (int)(dimensions[1] / scale);
+	int max_z_index = (int)(dimensions[2] / scale);
 
-	int x_index = (std::clamp<double>(position[0], origin[0], origin[0] + dimensions[0]) / dimensions[0]) * max_x_index;
-	int y_index = (std::clamp<double>(position[1], origin[1], origin[1] + dimensions[1]) / dimensions[1]) * max_y_index;
-	int z_index = (std::clamp<double>(position[2], origin[2], origin[2] + dimensions[2]) / dimensions[2]) * max_z_index;
+	int x_index, y_index, z_index = 0;
+
+	if (dimensions[0] > 0) {
+		x_index = (int)((std::clamp<double>(position[0], origin[0], origin[0] + dimensions[0]) / dimensions[0]) * max_x_index);
+	}
+
+	if (dimensions[1] > 0) {
+		y_index = (int)((std::clamp<double>(position[1], origin[1], origin[1] + dimensions[1]) / dimensions[1]) * max_y_index);
+	}
+
+	if (dimensions[2] > 0) {
+		z_index = (int)((std::clamp<double>(position[2], origin[2], origin[2] + dimensions[2]) / dimensions[2]) * max_z_index);
+	}
+
 	return graph->at(blaze::StaticVector<int, 3>{x_index, y_index, z_index});
 }
 
@@ -22,7 +33,7 @@ PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<doub
 	this->dimensions = dimensions;
 	this->origin = origin;
 	this->scale = scale;
-	this->graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, IndexVectorEquals>();
+	this->graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, PGraphNode::VectorEquals>();
 	int x_index = 0;
 	int	y_index = 0;
 	int z_index = 0;
@@ -35,6 +46,7 @@ PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<doub
 				PGraphNode* new_node = new PGraphNode();
 				blaze::StaticVector<int, 3UL> index{ x_index, y_index, z_index };
 				new_node->position = blaze::StaticVector<double, 3UL>{ i,j,k };
+				new_node->index = blaze::StaticVector<int, 3>{ x_index,y_index,z_index };
 				if (x_index > 0) {
 					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3UL> { x_index - 1, y_index, z_index }));
 				}

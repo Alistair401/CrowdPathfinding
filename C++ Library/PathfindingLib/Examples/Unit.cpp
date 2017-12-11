@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Unit.h"
 #include <math.h>
+#include "Pathfinding.h"
 
 Unit::Unit(double x, double y)
 {
@@ -21,8 +22,11 @@ Unit::~Unit()
 {
 }
 
-void Unit::update()
+void Unit::update(PGraph* graph)
 {
+	if (!path) {
+		path = Pathfinding::a_star(graph, blaze::StaticVector<double, 3>{x, y, 0}, blaze::StaticVector<double, 3>{0, 0, 0});
+	}
 }
 
 

@@ -5,6 +5,6 @@
 class Pathfinding
 {
 public:
-	static blaze::DynamicVector<blaze::StaticVector<float, 3UL>, blaze::rowVector> AStar(PGraph* graph, blaze::StaticVector<float, 3UL> from, blaze::StaticVector<float, 3UL> to);
+	static blaze::DynamicVector<blaze::StaticVector<double, 3UL>, blaze::rowVector>* a_star(PGraph* graph, blaze::StaticVector<double, 3UL> from, blaze::StaticVector<double, 3UL> to);
 };
 

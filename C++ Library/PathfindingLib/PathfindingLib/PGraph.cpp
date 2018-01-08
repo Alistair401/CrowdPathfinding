@@ -33,7 +33,7 @@ PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<doub
 	this->dimensions = dimensions;
 	this->origin = origin;
 	this->scale = scale;
-	this->graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, IndexVectorHash, PGraphNode::VectorEquals>();
+	this->graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, PGraphNode::IndexHash>();
 	int x_index = 0;
 	int	y_index = 0;
 	int z_index = 0;

@@ -2,6 +2,7 @@
 #include "Drawable.h"
 #include "blaze\Blaze.h"
 #include "PGraph.h"
+#include <vector>
 
 class Unit : public Drawable
 {
@@ -11,6 +12,6 @@ public:
 	~Unit();
 	void update(PGraph* graph);
 private:
-	blaze::DynamicVector<blaze::StaticVector<double, 3UL>, blaze::rowVector>* path = 0;
+	std::vector<blaze::StaticVector<double, 3UL>>* path = 0;
 };
 

@@ -25,7 +25,7 @@ Unit::~Unit()
 void Unit::update(PGraph* graph)
 {
 	if (!path) {
-		path = Pathfinding::a_star(graph, blaze::StaticVector<double, 3>{x, y, 0}, blaze::StaticVector<double, 3>{0, 0, 0});
+		path = Pathfinding::a_star(graph, blaze::StaticVector<double, 3>{x, y, 0.0f}, blaze::StaticVector<double, 3>{0.0f, 0.0f, 0.0f});
 	}
 }
 

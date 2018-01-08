@@ -39,7 +39,7 @@
     <ClInclude Include="PathfindingLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PQueue.h">
+    <ClInclude Include="NodeMinHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,7 +62,7 @@
     <ClCompile Include="PathfindingLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PQueue.cpp">
+    <ClCompile Include="NodeMinHeap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

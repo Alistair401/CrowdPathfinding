@@ -22,13 +22,12 @@ double heuristic_cost_estimate(PGraphNode* a, PGraphNode* b) {
 	return euclidean_distance(a->position, b->position);
 }
 
-
-
 std::vector<blaze::StaticVector<double, 3UL>>* Pathfinding::a_star(PGraph * graph, blaze::StaticVector<double, 3UL> from, blaze::StaticVector<double, 3UL> to)
 {
 	std::unordered_map<blaze::StaticVector<int, 3UL>, float, PGraphNode::IndexHash> f_score;
-	NodeMinHeap open_set(&f_score);
 	PGraphNode* from_node = graph->get_node_at(from);
+	f_score.emplace(from_node->index, 0);
+	NodeMinHeap open_set(&f_score);
 	open_set.Insert(from_node);
 	return new std::vector<blaze::StaticVector<double, 3UL>>();
 }

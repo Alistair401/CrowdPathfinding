@@ -12,9 +12,11 @@ public:
 
 	void Insert(PGraphNode*);
 	bool Contains(PGraphNode*);
+	bool SearchFor(blaze::StaticVector<int, 3UL> value, int root);
 	PGraphNode* Remove();
 private:
 	void Swap(int a, int b);
 	void UpHeapBubble(int index);
+	void DownHeapBubble(int index);
 };
 

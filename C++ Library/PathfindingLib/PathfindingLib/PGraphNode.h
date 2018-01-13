@@ -16,12 +16,13 @@ public:
 			return seed;
 		}
 	};
+
+
 	blaze::StaticVector<double, 3UL> position;
 	blaze::StaticVector<int, 3UL> index;
 	boolean obstacle;
 	std::vector<PGraphNode*> neighbors;
-	bool operator==(const blaze::StaticVector<int, 3UL>& other) const {
-		return index.at(0) == other.at(0) && index.at(1) == other.at(1) && index.at(2) == other.at(2);
+	bool operator==(PGraphNode& other) const {
+		return this->index == other.index;
 	}
-
 };

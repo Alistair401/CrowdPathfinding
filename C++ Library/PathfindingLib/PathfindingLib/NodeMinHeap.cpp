@@ -54,20 +54,23 @@ void NodeMinHeap::Insert(PGraphNode * n)
 
 bool NodeMinHeap::Contains(PGraphNode * n)
 {
+	if (IsEmpty())  return false;
 	return SearchFor(n->index, 0);
 }
 
-bool NodeMinHeap::SearchFor(blaze::StaticVector<int, 3UL> value, int root) {
-	if (root >= data.size()) {
-		return false;
-	}
-	if (data.at(root)->index == value) {
+bool NodeMinHeap::SearchFor(blaze::StaticVector<int, 3UL> value, int current_index) {
+	if (data.at(current_index)->index == value) {
 		return true;
 	}
-	if (f_score->at(data.at(root)->index) < f_score->at(value)) {
-		return SearchFor(value, LChild(root)) || SearchFor(value, RChild(root));
+	bool l = false;
+	if (LChild(current_index) < data.size()) {
+		l = SearchFor(value, LChild(current_index));
 	}
-	return false;
+	bool r = false;
+	if (RChild(current_index) < data.size()) {
+		r = SearchFor(value, RChild(current_index));
+	}
+	return  l || r;
 }
 
 PGraphNode * NodeMinHeap::Remove()
@@ -77,5 +80,10 @@ PGraphNode * NodeMinHeap::Remove()
 	data.pop_back();
 	DownHeapBubble(0);
 	return result;
+}
+
+bool NodeMinHeap::IsEmpty()
+{
+	return data.size() == 0;
 }
 

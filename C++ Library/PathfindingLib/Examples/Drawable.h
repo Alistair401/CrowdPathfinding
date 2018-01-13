@@ -4,7 +4,7 @@
 class Drawable
 {
 public:
-	virtual void draw(cairo_t *cr) = 0;
+	virtual void Draw(cairo_t *cr) = 0;
 	double x;
 	double y;
 };

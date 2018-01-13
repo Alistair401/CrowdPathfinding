@@ -7,11 +7,18 @@
 class Unit : public Drawable
 {
 public:
-	void draw(cairo_t* cr) override;
 	Unit(double x, double y);
+
+	void Draw(cairo_t* cr) override;
+	void AddForce(double x, double y);
+	void Update(PGraph* graph);
+
 	~Unit();
-	void update(PGraph* graph);
 private:
+	blaze::StaticVector<double, 2UL> vel{ 0,0 };
+	unsigned int path_index = 0;
 	std::vector<blaze::StaticVector<double, 3UL>>* path = 0;
+	void UpdateVelocity();
+	void UpdatePath(PGraph* graph);
 };
 

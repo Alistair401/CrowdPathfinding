@@ -12,7 +12,7 @@ Target::~Target()
 {
 }
 
-void Target::draw(cairo_t * cr)
+void Target::Draw(cairo_t * cr)
 {
 	cairo_set_source_rgb(cr, 1, 0, 0);
 	cairo_set_line_width(cr, 1);

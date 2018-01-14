@@ -6,34 +6,37 @@ void add_edge(PGraphNode* a, PGraphNode* b) {
 	b->neighbors.push_back(a);
 }
 
-PGraphNode* PGraph::get_node_at(blaze::StaticVector<double, 3UL> position) {
-	int max_x_index = (int)(dimensions[0] / scale);
-	int max_y_index = (int)(dimensions[1] / scale);
-	int max_z_index = (int)(dimensions[2] / scale);
+PGraphNode* PGraph::NodeAt(blaze::StaticVector<double, 3UL> position) {
+	int max_x_index = static_cast<int>(std::floor(dimensions[0] / scale));
+	int max_y_index = static_cast<int>(std::floor(dimensions[1] / scale));
+	int max_z_index = static_cast<int>(std::floor(dimensions[2] / scale));
 
-	int x_index, y_index, z_index = 0;
+	int x_index = 0, y_index = 0, z_index = 0;
 
 	if (dimensions[0] > 0) {
-		x_index = (int)((std::clamp<double>(position[0], origin[0], origin[0] + dimensions[0]) / dimensions[0]) * max_x_index);
+		double x_proportion = std::clamp((position[0] - origin[0]) / dimensions[0], 0.0, 1.0);
+		x_index = static_cast<int>(std::round(x_proportion * max_x_index));
 	}
 
 	if (dimensions[1] > 0) {
-		y_index = (int)((std::clamp<double>(position[1], origin[1], origin[1] + dimensions[1]) / dimensions[1]) * max_y_index);
+		double y_proportion = std::clamp((position[1] - origin[1]) / dimensions[1], 0.0, 1.0);
+		y_index = static_cast<int>(std::round(y_proportion * max_y_index));
 	}
 
 	if (dimensions[2] > 0) {
-		z_index = (int)((std::clamp<double>(position[2], origin[2], origin[2] + dimensions[2]) / dimensions[2]) * max_z_index);
+		double z_proportion = std::clamp((position[2] - origin[2]) / dimensions[2], 0.0, 1.0);
+		z_index = static_cast<int>(std::round(z_proportion * max_z_index));
 	}
 
 	return graph->at(blaze::StaticVector<int, 3>{x_index, y_index, z_index});
 }
 
-PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<double, 3UL> dimensions, double scale)
+PGraph::PGraph(blaze::StaticVector<double, 3> origin, blaze::StaticVector<double, 3> dimensions, double scale)
 {
 	this->dimensions = dimensions;
 	this->origin = origin;
 	this->scale = scale;
-	this->graph = new std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, PGraphNode::IndexHash>();
+	this->graph = new std::unordered_map<blaze::StaticVector<int, 3>, PGraphNode*, PGraphNode::IndexHash>();
 	int x_index = 0;
 	int	y_index = 0;
 	int z_index = 0;
@@ -48,13 +51,13 @@ PGraph::PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<doub
 				new_node->position = blaze::StaticVector<double, 3UL>{ i,j,k };
 				new_node->index = blaze::StaticVector<int, 3>{ x_index,y_index,z_index };
 				if (x_index > 0) {
-					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3UL> { x_index - 1, y_index, z_index }));
+					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3> { x_index - 1, y_index, z_index }));
 				}
 				if (y_index > 0) {
-					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3UL> { x_index, y_index - 1, z_index }));
+					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3> { x_index, y_index - 1, z_index }));
 				}
 				if (z_index > 0) {
-					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3UL> { x_index, y_index, z_index - 1 }));
+					add_edge(new_node, this->graph->at(blaze::StaticVector<int, 3> { x_index, y_index, z_index - 1 }));
 				}
 				this->graph->insert(std::make_pair(index, new_node));
 				z_index++;

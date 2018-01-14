@@ -23,10 +23,10 @@ void NodeMinHeap::Swap(int a, int b) {
 }
 
 void NodeMinHeap::UpHeapBubble(int index) {
-	int p_idx = Parent(index);
-	if (p_idx >= 0 && f_score->at(data.at(p_idx)->index) < f_score->at(data.at(index)->index)) {
-		Swap(p_idx, index);
-		UpHeapBubble(p_idx);
+	int parent = Parent(index);
+	if (parent >= 0 && f_score->at(data.at(parent)->index) > f_score->at(data.at(index)->index)) {
+		Swap(parent, index);
+		UpHeapBubble(parent);
 	}
 }
 
@@ -55,22 +55,25 @@ void NodeMinHeap::Insert(PGraphNode * n)
 bool NodeMinHeap::Contains(PGraphNode * n)
 {
 	if (IsEmpty())  return false;
-	return SearchFor(n->index, 0);
+	return SearchFor(n->index, 0) != -1;
 }
 
-bool NodeMinHeap::SearchFor(blaze::StaticVector<int, 3UL> value, int current_index) {
+int NodeMinHeap::SearchFor(blaze::StaticVector<int, 3UL> value, int current_index) {
 	if (data.at(current_index)->index == value) {
-		return true;
+		return current_index;
 	}
-	bool l = false;
+	int l = -1;
 	if (LChild(current_index) < data.size()) {
 		l = SearchFor(value, LChild(current_index));
 	}
-	bool r = false;
+	int r = -1;
 	if (RChild(current_index) < data.size()) {
 		r = SearchFor(value, RChild(current_index));
 	}
-	return  l || r;
+	if (l == -1) {
+		return r;
+	}
+	return  l;
 }
 
 PGraphNode * NodeMinHeap::Remove()
@@ -85,5 +88,22 @@ PGraphNode * NodeMinHeap::Remove()
 bool NodeMinHeap::IsEmpty()
 {
 	return data.size() == 0;
+}
+
+void NodeMinHeap::Update(PGraphNode* item) {
+	int index = SearchFor(item->index, 0);
+	UpHeapBubble(index);
+}
+
+bool NodeMinHeap::IsHeap(int current_index) {
+	if (current_index >= data.size()) {
+		return true;
+	}
+	float max = f_score->at(data.at(current_index)->index);
+	if (LChild(current_index) < data.size())
+		max = std::max(max, f_score->at(data.at(LChild(current_index))->index));
+	if (RChild(current_index) < data.size())
+		max = std::max(max, f_score->at(data.at(RChild(current_index))->index));
+	return max == f_score->at(data.at(current_index)->index) && IsHeap(LChild(current_index)) && IsHeap(RChild(current_index));
 }
 

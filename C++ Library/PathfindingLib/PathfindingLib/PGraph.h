@@ -8,7 +8,7 @@ class PGraph
 public:
 	PGraph(blaze::StaticVector<double, 3UL> origin, blaze::StaticVector<double, 3UL> dimensions, double scale);
 	~PGraph();
-	PGraphNode* PGraph::get_node_at(blaze::StaticVector<double, 3UL> position);
+	PGraphNode* PGraph::NodeAt(blaze::StaticVector<double, 3UL> position);
 private:
 	std::unordered_map<blaze::StaticVector<int, 3UL>, PGraphNode*, PGraphNode::IndexHash>* graph;
 	blaze::StaticVector<double, 3UL> dimensions;

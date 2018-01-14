@@ -7,6 +7,7 @@ Unit::Unit(double x, double y)
 {
 	this->x = x;
 	this->y = y;
+	SetTarget(x, y);
 }
 
 void Unit::Draw(cairo_t * cr)
@@ -34,6 +35,12 @@ void Unit::Update(PGraph* graph)
 	UpdatePath(graph);
 }
 
+void Unit::SetTarget(double x, double y)
+{
+	target[0] = x;
+	target[1] = y;
+}
+
 void Unit::UpdateVelocity() {
 	if (blaze::length(vel) > 1.0) {
 		vel = blaze::normalize(vel);
@@ -45,18 +52,17 @@ void Unit::UpdateVelocity() {
 void Unit::UpdatePath(PGraph* graph) {
 	if (!path) {
 		path_index = 0;
-		path = Pathfinding::a_star(graph, blaze::StaticVector<double, 3>{x, y, 0.0f}, blaze::StaticVector<double, 3>{0.0, 0.0, 0.0});
+		path = Pathfinding::a_star(graph, blaze::StaticVector<double, 3>{x, y, 0.0f}, blaze::StaticVector<double, 3>{target.at(0), target.at(1), 0.0});
 	}
 	blaze::StaticVector<double, 3UL> current_path = path->at(path_index);
 	// check if we're close enough to the current path_index to move to the next one, but don't exceed the path length
-	while (std::sqrt(std::pow(x - current_path[0], 2) + std::pow(y - current_path[1], 2)) < 10) {
+	while (std::sqrt(std::pow(x - current_path[0], 2) + std::pow(y - current_path[1], 2)) < 20) {
 		if (path_index == path->size() - 1) break;
 		path_index++;
 		current_path = path->at(path_index);
 	}
 	// add a force in the direction of the next path_index
-	double dir_x = x - current_path[0];
-	double dir_y = y - current_path[1];
+	double dir_x = current_path[0] - x;
+	double dir_y = current_path[1] - y;
 	AddForce(dir_x, dir_y);
-	printf("DEBUG: path index = %u\n", path_index);
 }

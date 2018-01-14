@@ -13,11 +13,13 @@ public:
 	bool Contains(PGraphNode*);
 	PGraphNode* Remove();
 	bool IsEmpty();
+	void Update(PGraphNode*);
 private:
 	std::vector<PGraphNode*> data;
 	void Swap(int a, int b);
 	void UpHeapBubble(int index);
 	void DownHeapBubble(int index);
-	bool SearchFor(blaze::StaticVector<int, 3UL> value, int root);
+	int SearchFor(blaze::StaticVector<int, 3UL> value, int root);
+	bool IsHeap(int current_index);
 };
 

@@ -7,7 +7,7 @@ class PGraphNode
 public:
 	struct IndexHash
 	{
-		std::size_t operator()(blaze::StaticVector<int, 3UL> const& i) const noexcept
+		std::size_t operator()(blaze::StaticVector<int, 3> const& i) const noexcept
 		{
 			std::size_t seed = 0;
 			boost::hash_combine(seed, i.at(0));
@@ -17,9 +17,8 @@ public:
 		}
 	};
 
-
-	blaze::StaticVector<double, 3UL> position;
-	blaze::StaticVector<int, 3UL> index;
+	blaze::StaticVector<double, 3> position;
+	blaze::StaticVector<int, 3> index;
 	boolean obstacle;
 	std::vector<PGraphNode*> neighbors;
 	bool operator==(PGraphNode& other) const {

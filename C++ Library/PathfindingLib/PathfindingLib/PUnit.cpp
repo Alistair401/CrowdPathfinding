@@ -1,6 +1,51 @@
 #include "stdafx.h"
 #include "PUnit.h"
+#include "UnitMediator.h"
 
-void PUnit::UpdatePosition(blaze::StaticVector<float, 3UL> position)
+PUnit::PUnit(blaze::StaticVector<double, 3UL> position)
 {
+	this->mediator = &UnitMediator::GetInstance();
+	this->id = mediator->AddUnit(this,0);
+	this->position = position;
+	this->heading = blaze::StaticVector<double, 3>{ 0,0,0 };
+}
+
+void PUnit::UpdatePosition(blaze::StaticVector<double, 3> position)
+{
+	this->position = position;
+}
+
+void PUnit::UpdateHeading(blaze::StaticVector<double, 3UL> heading)
+{
+	this->heading = heading;
+}
+
+blaze::StaticVector<double, 3> PUnit::GetForce()
+{
+	return mediator->GetForce(layer_id, id);
+}
+
+void PUnit::SetLayer(unsigned int layer_id)
+{
+	printf("ERROR: Layer changing not yet implemented");
+}
+
+void PUnit::SetLeader(PUnit * unit)
+{
+	this->leader = unit;
+}
+
+blaze::StaticVector<double, 3> PUnit::GetPosition()
+{
+	return position;
+}
+
+blaze::StaticVector<double, 3> PUnit::GetHeading()
+{
+	return heading;
+}
+
+PUnit * PUnit::GetLeader()
+{
+	return leader;
 }

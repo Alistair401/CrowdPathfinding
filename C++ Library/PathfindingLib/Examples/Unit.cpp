@@ -7,6 +7,7 @@ Unit::Unit(double x, double y)
 {
 	this->x = x;
 	this->y = y;
+	unit = new PUnit(blaze::StaticVector<double, 3>{x, y, 0});
 	SetTarget(x, y);
 }
 
@@ -31,8 +32,9 @@ void Unit::AddForce(double x, double y) {
 
 void Unit::Update(PGraph* graph)
 {
+	UpdateForces();
 	UpdateVelocity();
-	UpdatePath(graph);
+	//UpdatePath(graph);
 }
 
 void Unit::SetTarget(double x, double y)
@@ -47,6 +49,13 @@ void Unit::UpdateVelocity() {
 	}
 	this->x += vel.at(0);
 	this->y += vel.at(1);
+	unit->UpdatePosition(blaze::StaticVector<double, 3>{x, y, 0});
+	unit->UpdateHeading(blaze::StaticVector<double, 3>{vel.at(0), vel.at(1), 0});
+}
+
+void Unit::UpdateForces() {
+	blaze::StaticVector<double, 3> force = unit->GetForce();
+	AddForce(force.at(0), force.at(1));
 }
 
 void Unit::UpdatePath(PGraph* graph) {

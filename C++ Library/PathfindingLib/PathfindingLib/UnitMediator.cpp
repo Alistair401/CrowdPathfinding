@@ -17,6 +17,11 @@ unsigned int UnitMediator::AddUnit(PUnit * unit, unsigned int layer_id)
 	return layers.at(layer_id)->AddUnit(unit);
 }
 
+void UnitMediator::RemoveUnit(unsigned int unit_id, unsigned int layer_id)
+{
+	layers.at(layer_id)->RemoveUnit(unit_id);
+}
+
 blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, unsigned int unit_id)
 {
 	PUnitLayer* l = layers.at(layer_id);
@@ -27,8 +32,12 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 	blaze::StaticVector<double, 3> cohesion_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> following_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> resultant_vector{ 0,0,0 };
+	blaze::StaticVector<double, 3> target_vector{ 0,0,0 };
 
-	if (current->GetLeader() != nullptr) {
+	if (current->GetLeader() == nullptr) {
+		target_vector = current->GetTarget() - current->GetPosition();
+	}
+	else {
 		following_vector = current->GetLeader()->GetPosition() - current->GetPosition();
 	}
 
@@ -52,7 +61,8 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 	cohesion_vector = cohesion_vector * cohesion_factor;
 	alignment_vector = alignment_vector * alignment_factor;
 	following_vector = following_vector * following_factor;
+	target_vector = target_vector * target_factor;
 
-	resultant_vector = separation_vector + cohesion_vector + alignment_vector + following_vector;
+	resultant_vector = separation_vector + cohesion_vector + alignment_vector + following_vector + target_vector;
 	return resultant_vector;
 }

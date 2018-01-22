@@ -22,6 +22,7 @@ void Unit::Draw(cairo_t * cr)
 
 Unit::~Unit()
 {
+	delete unit;
 }
 
 void Unit::AddForce(double x, double y) {
@@ -34,13 +35,13 @@ void Unit::Update(PGraph* graph)
 {
 	UpdateForces();
 	UpdateVelocity();
-	//UpdatePath(graph);
 }
 
 void Unit::SetTarget(double x, double y)
 {
 	target[0] = x;
 	target[1] = y;
+	unit->UpdateTarget(blaze::StaticVector<double, 3>{x, y, 0});
 }
 
 void Unit::UpdateVelocity() {

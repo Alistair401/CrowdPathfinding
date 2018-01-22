@@ -20,6 +20,11 @@ void PUnit::UpdateHeading(blaze::StaticVector<double, 3UL> heading)
 	this->heading = heading;
 }
 
+void PUnit::UpdateTarget(blaze::StaticVector<double, 3UL> target)
+{
+	this->target = target;
+}
+
 blaze::StaticVector<double, 3> PUnit::GetForce()
 {
 	return mediator->GetForce(layer_id, id);
@@ -45,7 +50,17 @@ blaze::StaticVector<double, 3> PUnit::GetHeading()
 	return heading;
 }
 
+blaze::StaticVector<double, 3> PUnit::GetTarget()
+{
+	return target;
+}
+
 PUnit * PUnit::GetLeader()
 {
 	return leader;
+}
+
+PUnit::~PUnit()
+{
+	mediator->RemoveUnit(id,layer_id);
 }

@@ -9,6 +9,11 @@ unsigned int PUnitLayer::AddUnit(PUnit * unit)
 	return index;
 }
 
+void PUnitLayer::RemoveUnit(unsigned int unit_id)
+{
+	printf("ERROR: removing unit not yet implemented\n");
+}
+
 std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, double radius)
 {
 	PUnit* current = units.at(unit_id);

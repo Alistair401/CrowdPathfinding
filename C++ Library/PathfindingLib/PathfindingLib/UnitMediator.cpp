@@ -11,6 +11,7 @@ unsigned int UnitMediator::AddUnit(PUnit * unit, unsigned int layer_id)
 		unit->SetLeader(temp_leader);
 	}
 	// ---------------
+
 	if (layers.find(layer_id) == layers.end()) {
 		layers[layer_id] = new PUnitLayer();
 	}
@@ -20,6 +21,10 @@ unsigned int UnitMediator::AddUnit(PUnit * unit, unsigned int layer_id)
 void UnitMediator::RemoveUnit(unsigned int unit_id, unsigned int layer_id)
 {
 	layers.at(layer_id)->RemoveUnit(unit_id);
+
+	// -- temporary --
+	temp_leader = nullptr;
+	// ---------------
 }
 
 blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, unsigned int unit_id)

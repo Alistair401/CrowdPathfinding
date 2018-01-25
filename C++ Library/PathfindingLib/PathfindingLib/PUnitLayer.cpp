@@ -1,13 +1,13 @@
 #include "stdafx.h"
 #include "PUnitLayer.h"
-#include <boost/geometry/geometries/ring.hpp>
+#include <boost/geometry/geometries/geometries.hpp>
 
 
 unsigned int PUnitLayer::AddUnit(PUnit * unit)
 {
 	unsigned int index = static_cast<unsigned int>(units.size());
 	units.push_back(unit);
-	blaze::StaticVector<double,3> unit_pos = unit->GetPosition();
+	blaze::StaticVector<double, 3> unit_pos = unit->GetPosition();
 	point p = point(unit_pos[0], unit_pos[1], unit_pos[2]);
 	rtree.insert(std::make_pair(p, unit));
 	return index;
@@ -18,7 +18,7 @@ void PUnitLayer::RemoveUnit(unsigned int unit_id)
 	units[unit_id] = nullptr;
 }
 
-void PUnitLayer::UpdateUnit(unsigned int unit_id,blaze::StaticVector<double,3> position)
+void PUnitLayer::UpdateUnit(unsigned int unit_id, blaze::StaticVector<double, 3> position)
 {
 	//update unit position in rtree
 }
@@ -30,6 +30,11 @@ std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, double radius)
 	blaze::StaticVector<double, 3> unit_pos = current->GetPosition();
 	point p = point(unit_pos[0], unit_pos[1], unit_pos[2]);
 	// query r tree using polygon or ring
+	// should be intersects spatial query
+	// http://www.boost.org/doc/libs/master/libs/geometry/doc/html/geometry/reference/strategies/strategy_buffer_point_circle.html
+
+	boost::geometry::strategy::buffer::point_circle point_strategy(6);
+
 	return result;
 }
 

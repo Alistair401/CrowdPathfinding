@@ -4,6 +4,7 @@
 #include "blaze\Blaze.h"
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
 namespace geometry = boost::geometry;
@@ -21,6 +22,7 @@ public:
 private:
 	// -- Spatial data -- 
 	typedef geometry::model::point<double, 3, geometry::cs::cartesian> point;
+	typedef boost::geometry::model::polygon<point> polygon;
 	typedef std::pair<point, PUnit*> value;
 	geometryindex::rtree< value, geometryindex::quadratic<16> > rtree;
 	// ------------------

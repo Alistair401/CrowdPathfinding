@@ -27,11 +27,19 @@ void UnitMediator::RemoveUnit(unsigned int unit_id, unsigned int layer_id)
 	// ---------------
 }
 
+void UnitMediator::UpdateUnit(unsigned int unit_id, unsigned int layer_id, blaze::StaticVector<double, 3> position)
+{
+	layers.at(layer_id)->UpdateUnit(unit_id, position);
+}
+
 blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, unsigned int unit_id)
 {
 	PUnitLayer* l = layers.at(layer_id);
 	PUnit* current = l->GetUnit(unit_id);
+	//clock_t start = clock();
 	std::vector<PUnit*> nearby = l->Nearby(unit_id, 30);
+	//clock_t stop = clock();
+	//printf("Nearby time taken: %.4fs\n", (float)(stop - start) / CLOCKS_PER_SEC);
 	blaze::StaticVector<double, 3> separation_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> alignment_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> cohesion_vector{ 0,0,0 };
@@ -45,7 +53,7 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 	else {
 		following_vector = current->GetLeader()->GetPosition() - current->GetPosition();
 	}
-
+	//clock_t start = clock();
 	if (nearby.size() > 0) {
 		for (size_t i = 0; i < nearby.size(); i++)
 		{
@@ -61,7 +69,8 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 		cohesion_vector = (cohesion_vector / static_cast<int>(nearby.size())) - current->GetPosition();
 		alignment_vector = alignment_vector / static_cast<int>(nearby.size());
 	}
-
+	//clock_t stop = clock();
+	//printf("Force time taken: %.4fs\n", (float)(stop - start) / CLOCKS_PER_SEC);
 	separation_vector = separation_vector * separation_factor;
 	cohesion_vector = cohesion_vector * cohesion_factor;
 	alignment_vector = alignment_vector * alignment_factor;

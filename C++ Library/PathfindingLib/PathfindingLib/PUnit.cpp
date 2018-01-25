@@ -13,6 +13,7 @@ PUnit::PUnit(blaze::StaticVector<double, 3UL> position)
 void PUnit::UpdatePosition(blaze::StaticVector<double, 3> position)
 {
 	this->position = position;
+	this->mediator->UpdateUnit(id, layer_id, position);
 }
 
 void PUnit::UpdateHeading(blaze::StaticVector<double, 3UL> heading)

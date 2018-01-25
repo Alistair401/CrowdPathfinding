@@ -31,7 +31,7 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 {
 	PUnitLayer* l = layers.at(layer_id);
 	PUnit* current = l->GetUnit(unit_id);
-	std::vector<PUnit*> nearby = l->Nearby(unit_id, 80);
+	std::vector<PUnit*> nearby = l->Nearby(unit_id, 30);
 	blaze::StaticVector<double, 3> separation_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> alignment_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> cohesion_vector{ 0,0,0 };
@@ -51,8 +51,8 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 		{
 			PUnit* u = nearby.at(i);
 			blaze::StaticVector<double, 3> separating_vector = u->GetPosition() - current->GetPosition();
-			double separating_distance = blaze::length(separating_vector);
-			separation_vector = separation_vector + (separating_vector / std::pow(separating_distance,2));
+			double separating_distance = blaze::sqrLength(separating_vector);
+			separation_vector = separation_vector + (separating_vector / separating_distance);
 			alignment_vector = alignment_vector + u->GetHeading();
 			cohesion_vector = cohesion_vector + u->GetPosition();
 		}

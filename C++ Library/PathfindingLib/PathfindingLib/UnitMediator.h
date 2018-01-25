@@ -16,7 +16,7 @@ public:
 	unsigned int AddUnit(PUnit*, unsigned int);
 	void RemoveUnit(unsigned int, unsigned int);
 	blaze::StaticVector<double, 3> GetForce(unsigned int, unsigned int);
-	double cohesion_factor = 0.008;
+	double cohesion_factor = 0.001;
 	double separation_factor = 1;
 	double alignment_factor = 0 /*0.1*/;
 	double following_factor = 0.01;

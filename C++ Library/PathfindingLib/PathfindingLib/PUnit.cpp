@@ -13,7 +13,7 @@ PUnit::PUnit(blaze::StaticVector<double, 3UL> position)
 void PUnit::UpdatePosition(blaze::StaticVector<double, 3> position)
 {
 	this->position = position;
-	this->mediator->UpdateUnit(id, layer_id, position);
+	this->mediator->UpdateUnit(id);
 }
 
 void PUnit::UpdateHeading(blaze::StaticVector<double, 3UL> heading)
@@ -28,7 +28,7 @@ void PUnit::UpdateTarget(blaze::StaticVector<double, 3UL> target)
 
 blaze::StaticVector<double, 3> PUnit::GetForce()
 {
-	return mediator->GetForce(layer_id, id);
+	return mediator->GetForce(id);
 }
 
 void PUnit::SetLayer(unsigned int layer_id)
@@ -63,5 +63,5 @@ PUnit * PUnit::GetLeader()
 
 PUnit::~PUnit()
 {
-	mediator->RemoveUnit(id,layer_id);
+	mediator->RemoveUnit(id);
 }

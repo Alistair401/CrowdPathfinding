@@ -22,6 +22,6 @@ private:
 	unsigned int path_index = 0;
 	void UpdateVelocity();
 	void UpdateForces();
-	void UpdatePath(PGraph* graph);
+	//void UpdatePath(PGraph* graph);
 };
 

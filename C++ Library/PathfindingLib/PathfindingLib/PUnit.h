@@ -21,7 +21,6 @@ public:
 private:
 	UnitMediator * mediator;
 	unsigned int id;
-	unsigned int layer_id = 0;
 	blaze::StaticVector<double, 3> position;
 	blaze::StaticVector<double, 3> heading;
 	blaze::StaticVector<double, 3> target;

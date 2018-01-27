@@ -12,28 +12,47 @@ unsigned int UnitMediator::AddUnit(PUnit * unit, unsigned int layer_id)
 	}
 	// ---------------
 
+	// assign the unit an id
+	unsigned int new_id = 0;
+	if (free_unit_ids.size() > 0) {
+		new_id = free_unit_ids.back();
+		free_unit_ids.pop_back();
+	}
+	else {
+		new_id = next_unit_id++;
+	}
+
+	// asigned the unit to the specified layer (create the layer if it doesn't exist)
 	if (layers.find(layer_id) == layers.end()) {
 		layers[layer_id] = new PUnitLayer();
 	}
-	return layers.at(layer_id)->AddUnit(unit);
+	layer_allocation[new_id] = layer_id;
+	layers.at(layer_id)->AddUnit(unit,new_id);
+
+	return new_id;
 }
 
-void UnitMediator::RemoveUnit(unsigned int unit_id, unsigned int layer_id)
+void UnitMediator::RemoveUnit(unsigned int unit_id)
 {
+	unsigned int layer_id = layer_allocation.at(unit_id);
 	layers.at(layer_id)->RemoveUnit(unit_id);
+	layer_allocation.erase(unit_id);
+	free_unit_ids.push_back(unit_id);
 
 	// -- temporary --
 	temp_leader = nullptr;
 	// ---------------
 }
 
-void UnitMediator::UpdateUnit(unsigned int unit_id, unsigned int layer_id, blaze::StaticVector<double, 3> position)
+void UnitMediator::UpdateUnit(unsigned int unit_id)
 {
-	layers.at(layer_id)->UpdateUnit(unit_id, position);
+	unsigned int layer_id = layer_allocation.at(unit_id);
+	layers.at(layer_id)->UpdateUnit(unit_id);
 }
 
-blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, unsigned int unit_id)
+blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int unit_id)
 {
+	unsigned int layer_id = layer_allocation.at(unit_id);
 	PUnitLayer* l = layers.at(layer_id);
 	PUnit* current = l->GetUnit(unit_id);
 	std::vector<PUnit*> nearby = l->Nearby(unit_id, 30);
@@ -41,8 +60,8 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int layer_id, uns
 	blaze::StaticVector<double, 3> alignment_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> cohesion_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> following_vector{ 0,0,0 };
-	blaze::StaticVector<double, 3> resultant_vector{ 0,0,0 };
 	blaze::StaticVector<double, 3> target_vector{ 0,0,0 };
+	blaze::StaticVector<double, 3> resultant_vector{ 0,0,0 };
 
 	if (current->GetLeader() == nullptr) {
 		target_vector = current->GetTarget() - current->GetPosition();

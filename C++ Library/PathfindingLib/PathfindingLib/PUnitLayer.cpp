@@ -87,7 +87,6 @@ std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, double radius)
 		clusters = new std::vector<PUnit*>[centroids.size()];
 		for (int i = 0; i < iterations; i++)
 		{
-			unsigned int* closest_centroids = new unsigned int[list.size()];
 			for (size_t j = 0; j < list.size(); j++)
 			{
 				unsigned int closest = 0;
@@ -103,7 +102,6 @@ std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, double radius)
 				clusters[closest].push_back(unit_array[j]);
 				cluster_allocation[unit_array[j]] = closest;
 			}
-			delete[] closest_centroids;
 		}
 		delete[] unit_array;
 		valid = true;

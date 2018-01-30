@@ -2,16 +2,8 @@
 #include "PUnit.h"
 #include <vector>
 #include <unordered_map>
+#include <list>
 #include "blaze\Blaze.h"
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/index/rtree.hpp>
-
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
-
-typedef bg::model::point<double, 3, bg::cs::cartesian> point_t;
-typedef std::pair<point_t, PUnit*> value_t;
 
 class PUnitLayer
 {
@@ -23,8 +15,12 @@ public:
 	std::vector<PUnit*> Nearby(unsigned int unit_id, double radius);
 	PUnit* GetUnit(unsigned int unit_id);
 private:
-	bgi::rtree< value_t, bgi::quadratic<10> > rtree;
-	//bgi::rtree< value_t, bgi::rstar<10> > rtree;
-	std::unordered_map<unsigned int, value_t> members;
+	int k = 2;
+	int iterations = 2;
+	bool valid =false;
+	std::unordered_map<unsigned int, PUnit*> members;
+	std::list<PUnit*> list;
+	std::unordered_map<PUnit*, unsigned int> cluster_allocation;
+	std::vector<PUnit*>* clusters = nullptr;
 };
 

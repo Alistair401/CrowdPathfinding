@@ -73,6 +73,7 @@ blaze::StaticVector<double, 3> UnitMediator::GetForce(unsigned int unit_id)
 		for (size_t i = 0; i < nearby.size(); i++)
 		{
 			PUnit* u = nearby.at(i);
+			if (u == current) continue;
 			blaze::StaticVector<double, 3> separating_vector = u->GetPosition() - current->GetPosition();
 			double separating_distance = blaze::sqrLength(separating_vector);
 			separation_vector = separation_vector + (separating_vector / separating_distance);

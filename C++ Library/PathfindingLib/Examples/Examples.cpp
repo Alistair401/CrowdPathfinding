@@ -8,7 +8,7 @@
 #include "Unit.h"
 #include "Target.h"
 
-int population = 20;
+int population = 70;
 int target_count = 1;
 int window_width = 800;
 int window_height = 600;
@@ -17,7 +17,7 @@ int canvas_width = 0;
 int canvas_height = 0;
 
 std::vector<Unit*>* units = nullptr;
-std::vector<Target*>* targets;
+std::vector<Target*>* targets = nullptr;
 
 static void do_drawing(cairo_t *cr)
 {
@@ -94,15 +94,21 @@ void init_units() {
 }
 
 void init_graph() {
+	PSystem::GetInstance().CreateLayer(0);
 	blaze::StaticVector<double, 3> origin{ 0.0,0.0,0.0 };
 	blaze::StaticVector<double, 3> dimensions{ static_cast<double>(canvas_width),static_cast<double>(canvas_height),0.0 };
-	PSystem::GetInstance().InitGraph(origin, dimensions, 16);
+	PSystem::GetInstance().InitGraph(0, origin, dimensions, 50);
 }
 
 static void reset(GtkWidget* widget, gpointer data) {
 	if (units != nullptr) {
 		for (int i = 0; i < units->size(); i++) {
 			delete units->at(i);
+		}
+	}
+	if (targets != nullptr) {
+		for (int i = 0; i < targets->size(); i++) {
+			delete targets->at(i);
 		}
 	}
 	init_graph();

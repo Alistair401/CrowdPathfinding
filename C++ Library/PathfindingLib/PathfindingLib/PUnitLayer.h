@@ -1,9 +1,13 @@
 #pragma once
 #include "PUnit.h"
+#include "PGraphNode.h"
+#include "PGraph.h"
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <list>
 #include "blaze\Blaze.h"
+
 
 class PUnitLayer
 {
@@ -12,16 +16,13 @@ public:
 	void AddUnit(PUnit*, unsigned int unit_id);
 	void RemoveUnit(unsigned int unit_id);
 	void UpdateUnit(unsigned int unit_id);
-	void InvalidateClusters();
 	std::vector<PUnit*> Nearby(unsigned int unit_id, double radius);
 	PUnit* GetUnit(unsigned int unit_id);
+	void SetGraph(PGraph* graph);
 private:
-	int k = 2;
-	int iterations = 2;
-	bool valid = false;
+	PGraph * graph = nullptr;
 	std::unordered_map<unsigned int, PUnit*> members;
-	std::list<PUnit*> list;
-	std::unordered_map<PUnit*, unsigned int> cluster_allocation;
-	std::vector<PUnit*>* clusters = nullptr;
+	std::unordered_map<blaze::StaticVector<int, 3>, std::unordered_set<unsigned int>, PGraphNode::IndexHash> node_contents;
+	std::unordered_map<unsigned int, blaze::StaticVector<int, 3>> node_allocation;
 };
 

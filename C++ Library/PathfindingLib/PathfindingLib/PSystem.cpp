@@ -1,11 +1,9 @@
 #include "stdafx.h"
 #include "PSystem.h"
 
-void PSystem::InitGraph(blaze::StaticVector<double, 3> origin, blaze::StaticVector<double, 3> dimensions, double scale) {
-	if (graph != nullptr) {
-		delete graph;
-	}
-	graph = new PGraph(origin, dimensions, 16);
+void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<double, 3> origin, blaze::StaticVector<double, 3> dimensions, double scale) {
+	PGraph* graph = new PGraph(origin, dimensions, 16);
+	layers.at(layer_id)->SetGraph(graph);
 }
 
 unsigned int PSystem::CreateUnit(blaze::StaticVector<double, 3> position, unsigned int layer_id)
@@ -22,9 +20,6 @@ unsigned int PSystem::CreateUnit(blaze::StaticVector<double, 3> position, unsign
 		id = next_unit_id++;
 	}
 	// Assign it to a layer
-	if (layers.find(layer_id) == layers.end()) {
-		layers[layer_id] = new PUnitLayer();
-	}
 	layer_allocation[id] = layer_id;
 	layers.at(layer_id)->AddUnit(unit, id);
 	return id;
@@ -40,7 +35,7 @@ void PSystem::UpdateUnitPosition(unsigned int id, blaze::StaticVector<double, 3>
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdatePosition(position);
-	layer->InvalidateClusters();
+	layer->UpdateUnit(id);
 }
 
 void PSystem::UpdateUnitHeading(unsigned int id, blaze::StaticVector<double, 3> heading)
@@ -78,6 +73,7 @@ blaze::StaticVector<double, 3> PSystem::GetUnitForce(unsigned int id)
 		following_vector = leader->GetPosition() - current->GetPosition();
 	}
 	if (nearby.size() > 0) {
+		int actual_neighbours = 0;
 		for (size_t i = 0; i < nearby.size(); i++)
 		{
 			PUnit* u = nearby.at(i);
@@ -87,11 +83,13 @@ blaze::StaticVector<double, 3> PSystem::GetUnitForce(unsigned int id)
 			separation_vector = separation_vector + (separating_vector / separating_distance);
 			alignment_vector = alignment_vector + u->GetHeading();
 			cohesion_vector = cohesion_vector + u->GetPosition();
+			actual_neighbours++;
 		}
-
-		separation_vector = separation_vector * -1;
-		cohesion_vector = (cohesion_vector / static_cast<int>(nearby.size())) - current->GetPosition();
-		alignment_vector = alignment_vector / static_cast<int>(nearby.size());
+		if (actual_neighbours > 0) {
+			separation_vector = separation_vector * -1;
+			cohesion_vector = (cohesion_vector / static_cast<int>(nearby.size())) - current->GetPosition();
+			alignment_vector = alignment_vector / static_cast<int>(nearby.size());
+		}
 	}
 	separation_vector = separation_vector * separation_factor;
 	cohesion_vector = cohesion_vector * cohesion_factor;
@@ -101,6 +99,13 @@ blaze::StaticVector<double, 3> PSystem::GetUnitForce(unsigned int id)
 
 	resultant_vector = separation_vector + cohesion_vector + alignment_vector + following_vector + target_vector;
 	return resultant_vector;
+}
+
+void PSystem::CreateLayer(unsigned int layer_id)
+{
+	if (layers.find(layer_id) == layers.end()) {
+		layers[layer_id] = new PUnitLayer();
+	}
 }
 
 PUnit * PSystem::GetUnit(unsigned int unit_id)

@@ -1,28 +1,22 @@
 #pragma once
 #include "blaze\Blaze.h"
 
-class UnitMediator;
-
 class PUnit
 {
 public:
-	PUnit(blaze::StaticVector<double, 3UL> position);
+	PUnit(blaze::StaticVector<double, 3> position);
 	~PUnit();
-	void UpdatePosition(blaze::StaticVector<double, 3UL> position);
-	void UpdateHeading(blaze::StaticVector<double, 3UL> heading);
-	void UpdateTarget(blaze::StaticVector<double, 3UL> target);
-	void SetLayer(unsigned int);
-	void SetLeader(PUnit* unit);
-	blaze::StaticVector<double, 3> GetForce();
+	void UpdatePosition(blaze::StaticVector<double, 3> position);
+	void UpdateHeading(blaze::StaticVector<double, 3> heading);
+	void UpdateTarget(blaze::StaticVector<double, 3> target);
+	void SetLeader(unsigned int leader_id);
+	unsigned int GetLeader();
 	blaze::StaticVector<double, 3> GetPosition();
 	blaze::StaticVector<double, 3> GetHeading();
 	blaze::StaticVector<double, 3> GetTarget();
-	PUnit* GetLeader();
 private:
-	UnitMediator * mediator;
-	unsigned int id;
 	blaze::StaticVector<double, 3> position;
 	blaze::StaticVector<double, 3> heading;
 	blaze::StaticVector<double, 3> target;
-	PUnit* leader = nullptr;
+	unsigned int leader = 0;
 };

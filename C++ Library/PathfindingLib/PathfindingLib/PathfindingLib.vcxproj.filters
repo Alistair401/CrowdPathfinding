@@ -39,10 +39,10 @@
     <ClInclude Include="NodeMinHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnitMediator.h">
+    <ClInclude Include="PUnitLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PUnitLayer.h">
+    <ClInclude Include="PSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,10 +62,10 @@
     <ClCompile Include="NodeMinHeap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UnitMediator.cpp">
+    <ClCompile Include="PUnitLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PUnitLayer.cpp">
+    <ClCompile Include="PSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

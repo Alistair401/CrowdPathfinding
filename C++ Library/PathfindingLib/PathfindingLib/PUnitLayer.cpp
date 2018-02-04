@@ -22,6 +22,10 @@ void PUnitLayer::RemoveUnit(unsigned int unit_id)
 
 void PUnitLayer::UpdateUnit(unsigned int unit_id)
 {
+}
+
+void PUnitLayer::InvalidateClusters()
+{
 	valid = false;
 }
 
@@ -89,7 +93,7 @@ std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, double radius)
 		{
 			for (size_t j = 0; j < list.size(); j++)
 			{
-				unsigned int closest = 0;
+				size_t closest = 0;
 				double closest_distance = std::numeric_limits<double>::max();
 				for (size_t k = 0; k < centroids.size(); k++)
 				{

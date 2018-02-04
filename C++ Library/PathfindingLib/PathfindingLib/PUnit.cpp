@@ -1,11 +1,8 @@
 #include "stdafx.h"
 #include "PUnit.h"
-#include "UnitMediator.h"
 
-PUnit::PUnit(blaze::StaticVector<double, 3UL> position)
+PUnit::PUnit(blaze::StaticVector<double, 3> position)
 {
-	this->mediator = &UnitMediator::GetInstance();
-	this->id = mediator->AddUnit(this,0);
 	this->position = position;
 	this->heading = blaze::StaticVector<double, 3>{ 0,0,0 };
 }
@@ -13,32 +10,21 @@ PUnit::PUnit(blaze::StaticVector<double, 3UL> position)
 void PUnit::UpdatePosition(blaze::StaticVector<double, 3> position)
 {
 	this->position = position;
-	this->mediator->UpdateUnit(id);
 }
 
-void PUnit::UpdateHeading(blaze::StaticVector<double, 3UL> heading)
+void PUnit::UpdateHeading(blaze::StaticVector<double, 3> heading)
 {
 	this->heading = heading;
 }
 
-void PUnit::UpdateTarget(blaze::StaticVector<double, 3UL> target)
+void PUnit::UpdateTarget(blaze::StaticVector<double, 3> target)
 {
 	this->target = target;
 }
 
-blaze::StaticVector<double, 3> PUnit::GetForce()
+void PUnit::SetLeader(unsigned int leader_id)
 {
-	return mediator->GetForce(id);
-}
-
-void PUnit::SetLayer(unsigned int layer_id)
-{
-	printf("ERROR: Layer changing not yet implemented");
-}
-
-void PUnit::SetLeader(PUnit * unit)
-{
-	this->leader = unit;
+	this->leader = leader_id;
 }
 
 blaze::StaticVector<double, 3> PUnit::GetPosition()
@@ -56,12 +42,11 @@ blaze::StaticVector<double, 3> PUnit::GetTarget()
 	return target;
 }
 
-PUnit * PUnit::GetLeader()
+unsigned int PUnit::GetLeader()
 {
 	return leader;
 }
 
 PUnit::~PUnit()
 {
-	mediator->RemoveUnit(id);
 }

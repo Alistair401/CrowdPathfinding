@@ -1,11 +1,13 @@
 ﻿#include "stdafx.h"
-#include <random>
 #include <PSystem.h>
+#include <PGraph.h>
+#include <random>
 #include "blaze\Blaze.h"
 #include "cairo\cairo.h"
 #include "gtk\gtk.h"
 #include "Unit.h"
 #include "Target.h"
+#include "DrawDebug.h"
 
 int population = 40;
 int target_count = 1;
@@ -15,25 +17,26 @@ int window_height = 600;
 int canvas_width = 0;
 int canvas_height = 0;
 
-std::vector<Unit*>* units = nullptr;
-std::vector<Target*>* targets = nullptr;
+std::vector<Unit*> units;
+std::vector<Target*> targets;
+
+std::vector<DrawDebug*> debug;
 
 static void do_drawing(cairo_t *cr)
 {
 	cairo_set_source_rgb(cr, 0, 0, 0);
-	if (units) {
-		for (int i = 0; i < units->size(); i++)
-		{
-			units->at(i)->Draw(cr);
-		}
+	for (int i = 0; i < units.size(); i++)
+	{
+		units.at(i)->Draw(cr);
 	}
-	if (targets) {
-		for (int i = 0; i < targets->size(); i++)
-		{
-			targets->at(i)->Draw(cr);
-		}
+	for (int i = 0; i < targets.size(); i++)
+	{
+		targets.at(i)->Draw(cr);
 	}
-
+	for (int i = 0; i < debug.size(); i++)
+	{
+		debug.at(i)->Draw(cr);
+	}
 }
 
 static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
@@ -42,11 +45,9 @@ static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
 }
 
 void update_units() {
-	if (units) {
-		for (int i = 0; i < units->size(); i++)
-		{
-			units->at(i)->Update();
-		}
+	for (int i = 0; i < units.size(); i++)
+	{
+		units.at(i)->Update();
 	}
 }
 
@@ -63,7 +64,10 @@ static gboolean tick(GtkWidget* widget) {
 }
 
 void init_targets() {
-	targets = new std::vector<Target*>;
+	for (int i = 0; i < targets.size(); i++) {
+		delete targets.at(i);
+	}
+	targets.clear();
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -71,12 +75,15 @@ void init_targets() {
 	{
 		float x_pos = dis(gen) * canvas_width;
 		float y_pos = dis(gen) * canvas_height;
-		targets->push_back(new Target(x_pos, y_pos));
+		targets.push_back(new Target(x_pos, y_pos));
 	}
 }
 
 void init_units() {
-	units = new std::vector<Unit*>;
+	for (int i = 0; i < units.size(); i++) {
+		delete units.at(i);
+	}
+	units.clear();
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -86,30 +93,29 @@ void init_units() {
 		float y_pos = dis(gen) * canvas_height;
 		Unit* u = new Unit(x_pos, y_pos);
 		int random_target_index = std::rand() % target_count;
-		Target* random_target = targets->at(random_target_index);
+		Target* random_target = targets.at(random_target_index);
 		u->SetTarget(random_target->x, random_target->y);
-		units->push_back(u);
+		units.push_back(u);
 	}
 }
 
 void init_graph() {
+	for (int i = 0; i < debug.size(); i++) {
+		delete debug.at(i);
+	}
+	debug.clear();
 	PSystem::GetInstance().CreateLayer(0);
-	blaze::StaticVector<float, 3> origin{ 0.0,0.0,0.0 };
-	blaze::StaticVector<float, 3> dimensions{ static_cast<float>(canvas_width),static_cast<float>(canvas_height),0.0 };
+	blaze::StaticVector<float, 3> origin{ 0.0, 0.0, 0.0 };
+	blaze::StaticVector<float, 3> dimensions{ static_cast<float>(canvas_width), static_cast<float>(canvas_height), 0.0 };
 	PSystem::GetInstance().InitGraph(0, origin, dimensions, 50);
+	PGraph* graph = PSystem::GetInstance().GetGraph(0);
+	for (auto it = graph->graph->begin(); it != graph->graph->end(); it++) {
+		blaze::StaticVector<float, 3> pos = (*it).second->position;
+		debug.push_back(new DrawDebug(pos[0], pos[1]));
+	}
 }
 
 static void reset(GtkWidget* widget, gpointer data) {
-	if (units != nullptr) {
-		for (int i = 0; i < units->size(); i++) {
-			delete units->at(i);
-		}
-	}
-	if (targets != nullptr) {
-		for (int i = 0; i < targets->size(); i++) {
-			delete targets->at(i);
-		}
-	}
 	init_graph();
 	init_targets();
 	init_units();

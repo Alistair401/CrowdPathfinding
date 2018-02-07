@@ -2,8 +2,14 @@
 #include "PSystem.h"
 
 void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale) {
-	PGraph* graph = new PGraph(origin, dimensions, 16);
+	PGraph* graph = new PGraph(origin, dimensions, scale);
 	layers.at(layer_id)->SetGraph(graph);
+}
+
+PGraph* PSystem::GetGraph(unsigned int layer_id)
+{
+	PUnitLayer* l = layers.at(layer_id);
+	return l->GetGraph();
 }
 
 unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3> position, unsigned int layer_id)
@@ -57,9 +63,8 @@ blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	PUnit* current = layer->GetUnit(id);
-	std::vector<PUnit*> nearby = layer->Nearby(id, 30);
+	std::unordered_set<unsigned int> nearby = layer->Nearby(id);
 	blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
-	blaze::StaticVector<float, 3> alignment_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> following_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
@@ -74,30 +79,27 @@ blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 	}
 	if (nearby.size() > 0) {
 		int actual_neighbours = 0;
-		for (size_t i = 0; i < nearby.size(); i++)
+		for (auto it = nearby.begin(); it != nearby.end(); it++)
 		{
-			PUnit* u = nearby.at(i);
+			PUnit* u = layer->GetUnit(*it);
 			if (u == current) continue;
 			blaze::StaticVector<float, 3> separating_vector = u->GetPosition() - current->GetPosition();
 			float separating_distance = blaze::sqrLength(separating_vector);
 			separation_vector = separation_vector + (separating_vector / separating_distance);
-			alignment_vector = alignment_vector + u->GetHeading();
 			cohesion_vector = cohesion_vector + u->GetPosition();
 			actual_neighbours++;
 		}
 		if (actual_neighbours > 0) {
 			separation_vector = separation_vector * -1;
 			cohesion_vector = (cohesion_vector / static_cast<int>(nearby.size())) - current->GetPosition();
-			alignment_vector = alignment_vector / static_cast<int>(nearby.size());
 		}
 	}
 	separation_vector = separation_vector * separation_factor;
 	cohesion_vector = cohesion_vector * cohesion_factor;
-	alignment_vector = alignment_vector * alignment_factor;
 	following_vector = following_vector * following_factor;
 	target_vector = target_vector * target_factor;
 
-	resultant_vector = separation_vector + cohesion_vector + alignment_vector + following_vector + target_vector;
+	resultant_vector = separation_vector + cohesion_vector + following_vector + target_vector;
 	return resultant_vector;
 }
 

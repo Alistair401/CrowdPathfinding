@@ -16,6 +16,7 @@ public:
 	void operator=(PSystem const&) = delete;
 	// Graph Management
 	void InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale);
+	PGraph* GetGraph(unsigned int layer_id); // DEBUG
 	// Unit Management
 	unsigned int CreateUnit(blaze::StaticVector<float, 3> position, unsigned int layer_id);
 	void UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3> target);

@@ -45,20 +45,18 @@ void PUnitLayer::SetGraph(PGraph * graph)
 	this->graph = graph;
 }
 
-std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, float radius)
+PGraph * PUnitLayer::GetGraph()
+{
+	return graph;
+}
+
+std::unordered_set<unsigned int> PUnitLayer::Nearby(unsigned int unit_id)
 {
 	PUnit* current = members.at(unit_id);
 
-	if (graph == nullptr) return std::vector<PUnit*>();
+	if (graph == nullptr) return std::unordered_set<unsigned int>();
 
-	std::vector<PUnit*> nearby;
-	std::unordered_set<unsigned int> contents = node_contents.at(node_allocation.at(unit_id));
-	for (auto it = contents.begin(); it != contents.end(); it++)
-	{
-		nearby.push_back(GetUnit(*it));
-	}
-
-	return nearby;
+	return node_contents.at(node_allocation.at(unit_id));
 }
 
 

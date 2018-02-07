@@ -4,7 +4,7 @@ class Target : public Drawable
 {
 public:
 	void Draw(cairo_t * cr) override;
-	Target(double x, double y);
+	Target(float x, float y);
 	~Target();
 };
 

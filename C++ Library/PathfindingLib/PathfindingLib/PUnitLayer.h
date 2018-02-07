@@ -16,7 +16,7 @@ public:
 	void AddUnit(PUnit*, unsigned int unit_id);
 	void RemoveUnit(unsigned int unit_id);
 	void UpdateUnit(unsigned int unit_id);
-	std::vector<PUnit*> Nearby(unsigned int unit_id, double radius);
+	std::vector<PUnit*> Nearby(unsigned int unit_id, float radius);
 	PUnit* GetUnit(unsigned int unit_id);
 	void SetGraph(PGraph* graph);
 private:

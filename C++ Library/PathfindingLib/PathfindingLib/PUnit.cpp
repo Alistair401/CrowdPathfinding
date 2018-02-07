@@ -1,23 +1,23 @@
 #include "stdafx.h"
 #include "PUnit.h"
 
-PUnit::PUnit(blaze::StaticVector<double, 3> position)
+PUnit::PUnit(blaze::StaticVector<float, 3> position)
 {
 	this->position = position;
-	this->heading = blaze::StaticVector<double, 3>{ 0,0,0 };
+	this->heading = blaze::StaticVector<float, 3>{ 0,0,0 };
 }
 
-void PUnit::UpdatePosition(blaze::StaticVector<double, 3> position)
+void PUnit::UpdatePosition(blaze::StaticVector<float, 3> position)
 {
 	this->position = position;
 }
 
-void PUnit::UpdateHeading(blaze::StaticVector<double, 3> heading)
+void PUnit::UpdateHeading(blaze::StaticVector<float, 3> heading)
 {
 	this->heading = heading;
 }
 
-void PUnit::UpdateTarget(blaze::StaticVector<double, 3> target)
+void PUnit::UpdateTarget(blaze::StaticVector<float, 3> target)
 {
 	this->target = target;
 }
@@ -27,17 +27,17 @@ void PUnit::SetLeader(unsigned int leader_id)
 	this->leader = leader_id;
 }
 
-blaze::StaticVector<double, 3> PUnit::GetPosition()
+blaze::StaticVector<float, 3> PUnit::GetPosition()
 {
 	return position;
 }
 
-blaze::StaticVector<double, 3> PUnit::GetHeading()
+blaze::StaticVector<float, 3> PUnit::GetHeading()
 {
 	return heading;
 }
 
-blaze::StaticVector<double, 3> PUnit::GetTarget()
+blaze::StaticVector<float, 3> PUnit::GetTarget()
 {
 	return target;
 }

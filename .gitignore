@@ -40,3 +40,5 @@ C++ Library/Examples/.vs/
 C++ Library/PathfindingLib/Examples/x64/
 *.ilk
 *.pdb
+*.psess
+*.vspx

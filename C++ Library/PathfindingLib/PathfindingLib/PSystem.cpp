@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "PSystem.h"
 
-void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<double, 3> origin, blaze::StaticVector<double, 3> dimensions, double scale) {
+void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale) {
 	PGraph* graph = new PGraph(origin, dimensions, 16);
 	layers.at(layer_id)->SetGraph(graph);
 }
 
-unsigned int PSystem::CreateUnit(blaze::StaticVector<double, 3> position, unsigned int layer_id)
+unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3> position, unsigned int layer_id)
 {
 	// Create the unit
 	PUnit* unit = new PUnit(position);
@@ -25,20 +25,20 @@ unsigned int PSystem::CreateUnit(blaze::StaticVector<double, 3> position, unsign
 	return id;
 }
 
-void PSystem::UpdateUnitTarget(unsigned int id, blaze::StaticVector<double, 3> target)
+void PSystem::UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3> target)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateTarget(target);
 }
 
-void PSystem::UpdateUnitPosition(unsigned int id, blaze::StaticVector<double, 3> position)
+void PSystem::UpdateUnitPosition(unsigned int id, blaze::StaticVector<float, 3> position)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdatePosition(position);
 	layer->UpdateUnit(id);
 }
 
-void PSystem::UpdateUnitHeading(unsigned int id, blaze::StaticVector<double, 3> heading)
+void PSystem::UpdateUnitHeading(unsigned int id, blaze::StaticVector<float, 3> heading)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateHeading(heading);
@@ -53,17 +53,17 @@ void PSystem::DestroyUnit(unsigned int id)
 	delete unit;
 }
 
-blaze::StaticVector<double, 3> PSystem::GetUnitForce(unsigned int id)
+blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	PUnit* current = layer->GetUnit(id);
 	std::vector<PUnit*> nearby = layer->Nearby(id, 30);
-	blaze::StaticVector<double, 3> separation_vector{ 0,0,0 };
-	blaze::StaticVector<double, 3> alignment_vector{ 0,0,0 };
-	blaze::StaticVector<double, 3> cohesion_vector{ 0,0,0 };
-	blaze::StaticVector<double, 3> following_vector{ 0,0,0 };
-	blaze::StaticVector<double, 3> target_vector{ 0,0,0 };
-	blaze::StaticVector<double, 3> resultant_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> alignment_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> following_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> resultant_vector{ 0,0,0 };
 
 	if (current->GetLeader() == 0) {
 		target_vector = current->GetTarget() - current->GetPosition();
@@ -78,8 +78,8 @@ blaze::StaticVector<double, 3> PSystem::GetUnitForce(unsigned int id)
 		{
 			PUnit* u = nearby.at(i);
 			if (u == current) continue;
-			blaze::StaticVector<double, 3> separating_vector = u->GetPosition() - current->GetPosition();
-			double separating_distance = blaze::sqrLength(separating_vector);
+			blaze::StaticVector<float, 3> separating_vector = u->GetPosition() - current->GetPosition();
+			float separating_distance = blaze::sqrLength(separating_vector);
 			separation_vector = separation_vector + (separating_vector / separating_distance);
 			alignment_vector = alignment_vector + u->GetHeading();
 			cohesion_vector = cohesion_vector + u->GetPosition();

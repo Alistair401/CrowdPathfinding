@@ -30,9 +30,6 @@
     <ClInclude Include="Target.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Examples.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

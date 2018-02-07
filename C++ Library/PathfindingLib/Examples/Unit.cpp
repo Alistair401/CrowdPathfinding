@@ -4,11 +4,11 @@
 #include <math.h>
 #include <PSystem.h>
 
-Unit::Unit(double x, double y)
+Unit::Unit(float x, float y)
 {
 	this->x = x;
 	this->y = y;
-	system_id = PSystem::GetInstance().CreateUnit(blaze::StaticVector<double, 3>{x, y, 0},0);
+	system_id = PSystem::GetInstance().CreateUnit(blaze::StaticVector<float, 3>{x, y, 0},0);
 	SetTarget(x, y);
 }
 
@@ -26,7 +26,7 @@ Unit::~Unit()
 	PSystem::GetInstance().DestroyUnit(system_id);
 }
 
-void Unit::AddForce(double x, double y) {
+void Unit::AddForce(float x, float y) {
 	// assumes mass = 1 and delta_time = 1 since we're not too bothered about the phyiscs
 	vel[0] += x;
 	vel[1] += y;
@@ -38,11 +38,11 @@ void Unit::Update()
 	UpdateVelocity();
 }
 
-void Unit::SetTarget(double x, double y)
+void Unit::SetTarget(float x, float y)
 {
 	target[0] = x;
 	target[1] = y;
-	PSystem::GetInstance().UpdateUnitTarget(system_id, blaze::StaticVector<double, 3>{x, y, 0});
+	PSystem::GetInstance().UpdateUnitTarget(system_id, blaze::StaticVector<float, 3>{x, y, 0});
 }
 
 void Unit::UpdateVelocity() {
@@ -51,11 +51,11 @@ void Unit::UpdateVelocity() {
 	}
 	this->x += vel.at(0);
 	this->y += vel.at(1);
-	PSystem::GetInstance().UpdateUnitPosition(system_id, blaze::StaticVector<double, 3>{x, y, 0});
-	PSystem::GetInstance().UpdateUnitHeading(system_id, blaze::StaticVector<double, 3>{vel.at(0), vel.at(1), 0});
+	PSystem::GetInstance().UpdateUnitPosition(system_id, blaze::StaticVector<float, 3>{x, y, 0});
+	PSystem::GetInstance().UpdateUnitHeading(system_id, blaze::StaticVector<float, 3>{vel.at(0), vel.at(1), 0});
 }
 
 void Unit::UpdateForces() {
-	blaze::StaticVector<double, 3> force = PSystem::GetInstance().GetUnitForce(system_id);
+	blaze::StaticVector<float, 3> force = PSystem::GetInstance().GetUnitForce(system_id);
 	AddForce(force.at(0), force.at(1));
 }

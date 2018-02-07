@@ -6,16 +6,16 @@
 class Unit : public Drawable
 {
 public:
-	Unit(double x, double y);
+	Unit(float x, float y);
 	void Draw(cairo_t* cr) override;
-	void AddForce(double x, double y);
+	void AddForce(float x, float y);
 	void Update();
-	void SetTarget(double x, double y);
+	void SetTarget(float x, float y);
 	~Unit();
 private:
 	unsigned int system_id;
-	blaze::StaticVector<double, 2> target{ 0,0 };
-	blaze::StaticVector<double, 2> vel{ 0,0 };
+	blaze::StaticVector<float, 2> target{ 0,0 };
+	blaze::StaticVector<float, 2> vel{ 0,0 };
 	void UpdateVelocity();
 	void UpdateForces();
 };

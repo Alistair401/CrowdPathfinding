@@ -17,7 +17,7 @@ public:
 		}
 	};
 
-	blaze::StaticVector<double, 3> position;
+	blaze::StaticVector<float, 3> position;
 	blaze::StaticVector<int, 3> index;
 	boolean obstacle;
 	std::vector<PGraphNode*> neighbors;

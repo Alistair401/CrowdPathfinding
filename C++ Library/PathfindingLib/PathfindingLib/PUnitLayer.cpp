@@ -45,7 +45,7 @@ void PUnitLayer::SetGraph(PGraph * graph)
 	this->graph = graph;
 }
 
-std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, double radius)
+std::vector<PUnit*> PUnitLayer::Nearby(unsigned int unit_id, float radius)
 {
 	PUnit* current = members.at(unit_id);
 

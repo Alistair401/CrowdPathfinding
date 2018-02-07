@@ -1,5 +1,4 @@
 ﻿#include "stdafx.h"
-#include <stdlib.h>
 #include <random>
 #include <PSystem.h>
 #include "blaze\Blaze.h"
@@ -8,7 +7,7 @@
 #include "Unit.h"
 #include "Target.h"
 
-int population = 70;
+int population = 40;
 int target_count = 1;
 int window_width = 800;
 int window_height = 600;
@@ -70,8 +69,8 @@ void init_targets() {
 	std::uniform_real_distribution<> dis(0.0, 1.0);
 	for (int i = 0; i < target_count; i++)
 	{
-		double x_pos = dis(gen) * canvas_width;
-		double y_pos = dis(gen) * canvas_height;
+		float x_pos = dis(gen) * canvas_width;
+		float y_pos = dis(gen) * canvas_height;
 		targets->push_back(new Target(x_pos, y_pos));
 	}
 }
@@ -83,8 +82,8 @@ void init_units() {
 	std::uniform_real_distribution<> dis(0.0, 1.0);
 	for (int i = 0; i < population; i++)
 	{
-		double x_pos = dis(gen) * canvas_width;
-		double y_pos = dis(gen) * canvas_height;
+		float x_pos = dis(gen) * canvas_width;
+		float y_pos = dis(gen) * canvas_height;
 		Unit* u = new Unit(x_pos, y_pos);
 		int random_target_index = std::rand() % target_count;
 		Target* random_target = targets->at(random_target_index);
@@ -95,8 +94,8 @@ void init_units() {
 
 void init_graph() {
 	PSystem::GetInstance().CreateLayer(0);
-	blaze::StaticVector<double, 3> origin{ 0.0,0.0,0.0 };
-	blaze::StaticVector<double, 3> dimensions{ static_cast<double>(canvas_width),static_cast<double>(canvas_height),0.0 };
+	blaze::StaticVector<float, 3> origin{ 0.0,0.0,0.0 };
+	blaze::StaticVector<float, 3> dimensions{ static_cast<float>(canvas_width),static_cast<float>(canvas_height),0.0 };
 	PSystem::GetInstance().InitGraph(0, origin, dimensions, 50);
 }
 

@@ -2,7 +2,7 @@
 #include "Target.h"
 
 
-Target::Target(double x, double y)
+Target::Target(float x, float y)
 {
 	this->x = x;
 	this->y = y;

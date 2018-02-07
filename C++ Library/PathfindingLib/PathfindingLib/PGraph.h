@@ -6,13 +6,13 @@
 class PGraph
 {
 public:
-	PGraph(blaze::StaticVector<double, 3> origin, blaze::StaticVector<double, 3> dimensions, double scale);
+	PGraph(blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale);
 	~PGraph();
-	PGraphNode* PGraph::NodeAt(blaze::StaticVector<double, 3> position);
+	PGraphNode* PGraph::NodeAt(blaze::StaticVector<float, 3> position);
 private:
 	std::unordered_map<blaze::StaticVector<int, 3>, PGraphNode*, PGraphNode::IndexHash>* graph;
-	blaze::StaticVector<double, 3> dimensions;
-	blaze::StaticVector<double, 3> origin;
-	double scale;
+	blaze::StaticVector<float, 3> dimensions;
+	blaze::StaticVector<float, 3> origin;
+	float scale;
 };
 

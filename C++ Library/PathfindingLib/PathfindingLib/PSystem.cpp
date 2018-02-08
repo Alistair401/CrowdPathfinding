@@ -31,26 +31,26 @@ unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3> position, unsigne
 	return id;
 }
 
-void PSystem::UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3> target)
+void PSystem::UpdateUnitTarget(unsigned int& id, blaze::StaticVector<float, 3>& target)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateTarget(target);
 }
 
-void PSystem::UpdateUnitPosition(unsigned int id, blaze::StaticVector<float, 3> position)
+void PSystem::UpdateUnitPosition(unsigned int& id, blaze::StaticVector<float, 3>& position)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdatePosition(position);
 	layer->UpdateUnit(id);
 }
 
-void PSystem::UpdateUnitHeading(unsigned int id, blaze::StaticVector<float, 3> heading)
+void PSystem::UpdateUnitHeading(unsigned int& id, blaze::StaticVector<float, 3>& heading)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateHeading(heading);
 }
 
-void PSystem::DestroyUnit(unsigned int id)
+void PSystem::DestroyUnit(unsigned int& id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	PUnit* unit = layer->GetUnit(id);
@@ -59,29 +59,31 @@ void PSystem::DestroyUnit(unsigned int id)
 	delete unit;
 }
 
-blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
+blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int& id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	PUnit* current = layer->GetUnit(id);
-	std::unordered_set<unsigned int> nearby = layer->Nearby(id);
+	std::unordered_set<unsigned int> &nearby = layer->Nearby(id);
 	blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> following_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> resultant_vector{ 0,0,0 };
 
-	if (current->GetLeader() == 0) {
+	unsigned int leader_id = current->GetLeader();
+	if (leader_id == 0) {
 		target_vector = current->GetTarget() - current->GetPosition();
 	}
 	else {
-		PUnit* leader = GetUnit(current->GetLeader());
+		PUnit* leader = GetUnit(leader_id);
 		following_vector = leader->GetPosition() - current->GetPosition();
 	}
 	if (nearby.size() > 0) {
 		int actual_neighbours = 0;
 		for (auto it = nearby.begin(); it != nearby.end(); it++)
 		{
-			PUnit* u = layer->GetUnit(*it);
+			unsigned int nearby_id = (*it);
+			PUnit* u = layer->GetUnit(nearby_id);
 			if (u == current) continue;
 			blaze::StaticVector<float, 3> separating_vector = u->GetPosition() - current->GetPosition();
 			float separating_distance = blaze::sqrLength(separating_vector);
@@ -110,7 +112,7 @@ void PSystem::CreateLayer(unsigned int layer_id)
 	}
 }
 
-PUnit * PSystem::GetUnit(unsigned int unit_id)
+PUnit * PSystem::GetUnit(unsigned int& unit_id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(unit_id));
 	PUnit* unit = layer->GetUnit(unit_id);

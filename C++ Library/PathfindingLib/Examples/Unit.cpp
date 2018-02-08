@@ -56,6 +56,6 @@ void Unit::UpdateVelocity() {
 }
 
 void Unit::UpdateForces() {
-	blaze::StaticVector<float, 3> force = PSystem::GetInstance().GetUnitForce(system_id);
+	blaze::StaticVector<float, 3>& force = PSystem::GetInstance().GetUnitForce(system_id);
 	AddForce(force.at(0), force.at(1));
 }

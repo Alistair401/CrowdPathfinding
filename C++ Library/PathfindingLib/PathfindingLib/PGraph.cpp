@@ -31,6 +31,10 @@ PGraphNode* PGraph::NodeAt(blaze::StaticVector<float, 3> position) {
 	return graph->at(blaze::StaticVector<int, 3>{x_index, y_index, z_index});
 }
 
+PGraphNode* PGraph::NodeAtIndex(blaze::StaticVector<int, 3> index) {
+	return graph->at(index);
+}
+
 PGraph::PGraph(blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale)
 {
 	this->origin = origin;

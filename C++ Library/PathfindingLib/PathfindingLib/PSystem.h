@@ -19,12 +19,12 @@ public:
 	PGraph* GetGraph(unsigned int layer_id); // DEBUG
 	// Unit Management
 	unsigned int CreateUnit(blaze::StaticVector<float, 3> position, unsigned int layer_id);
-	void UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3> target);
-	void UpdateUnitPosition(unsigned int id, blaze::StaticVector<float, 3> position);
-	void UpdateUnitHeading(unsigned int id, blaze::StaticVector<float, 3> heading);
-	void DestroyUnit(unsigned int id);
+	void UpdateUnitTarget(unsigned int& id, blaze::StaticVector<float, 3>& target);
+	void UpdateUnitPosition(unsigned int& id, blaze::StaticVector<float, 3>& position);
+	void UpdateUnitHeading(unsigned int& id, blaze::StaticVector<float, 3>& heading);
+	void DestroyUnit(unsigned int& id);
 	// Unit Interaction
-	blaze::StaticVector<float, 3> GetUnitForce(unsigned int id);
+	blaze::StaticVector<float, 3> GetUnitForce(unsigned int& id);
 	// Layer Management
 	void CreateLayer(unsigned int layer_id);
 private:
@@ -33,7 +33,7 @@ private:
 	// Unit Management
 	unsigned int next_unit_id = 1;
 	std::vector<unsigned int> free_unit_ids;
-	PUnit* GetUnit(unsigned int unit_id);
+	PUnit* GetUnit(unsigned int& unit_id);
 	// Unit Interaction
 	float cohesion_factor = 0.001f;
 	float separation_factor = 1;

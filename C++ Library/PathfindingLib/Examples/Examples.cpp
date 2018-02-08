@@ -9,7 +9,7 @@
 #include "Target.h"
 #include "DrawDebug.h"
 
-int population = 40;
+int population = 20;
 int target_count = 1;
 int window_width = 800;
 int window_height = 600;
@@ -109,10 +109,10 @@ void init_graph() {
 	blaze::StaticVector<float, 3> dimensions{ static_cast<float>(canvas_width), static_cast<float>(canvas_height), 0.0 };
 	PSystem::GetInstance().InitGraph(0, origin, dimensions, 50);
 	PGraph* graph = PSystem::GetInstance().GetGraph(0);
-	for (auto it = graph->graph->begin(); it != graph->graph->end(); it++) {
-		blaze::StaticVector<float, 3> pos = (*it).second->position;
-		debug.push_back(new DrawDebug(pos[0], pos[1]));
-	}
+	//for (auto it = graph->graph->begin(); it != graph->graph->end(); it++) {
+	//	blaze::StaticVector<float, 3> pos = (*it).second->position;
+	//	debug.push_back(new DrawDebug(pos[0], pos[1]));
+	//}
 }
 
 static void reset(GtkWidget* widget, gpointer data) {

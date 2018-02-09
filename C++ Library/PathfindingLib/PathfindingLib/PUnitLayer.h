@@ -15,10 +15,10 @@ class PUnitLayer
 public:
 	unsigned int id;
 	void AddUnit(PUnit*, unsigned int unit_id);
-	void RemoveUnit(unsigned int& unit_id);
-	void UpdateUnit(unsigned int& unit_id);
-	PUnit* GetUnit(unsigned int& unit_id);
-	std::unordered_set<unsigned int> Nearby(unsigned int& unit_id);
+	void RemoveUnit(unsigned int unit_id);
+	void UpdateUnit(unsigned int unit_id);
+	PUnit* GetUnit(unsigned int unit_id);
+	std::unordered_set<unsigned int> Nearby(unsigned int unit_id);
 	void SetGraph(PGraph* graph);
 	PGraph* GetGraph();
 private:

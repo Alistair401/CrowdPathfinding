@@ -7,7 +7,7 @@ void PUnitLayer::AddUnit(PUnit * unit, unsigned int unit_id)
 	UpdateUnit(unit_id);
 }
 
-void PUnitLayer::RemoveUnit(unsigned int& unit_id)
+void PUnitLayer::RemoveUnit(unsigned int unit_id)
 {
 	members.erase(unit_id);
 	if (node_allocation.find(unit_id) != node_allocation.end()) {
@@ -17,7 +17,7 @@ void PUnitLayer::RemoveUnit(unsigned int& unit_id)
 	}
 }
 
-void PUnitLayer::UpdateUnit(unsigned int& unit_id)
+void PUnitLayer::UpdateUnit(unsigned int unit_id)
 {
 	PUnit* unit = members.at(unit_id);
 	blaze::StaticVector<int, 3> node_index = graph->NodeAt(unit->GetPosition())->index;
@@ -35,7 +35,7 @@ void PUnitLayer::UpdateUnit(unsigned int& unit_id)
 	node_allocation[unit_id] = node_index;
 }
 
-PUnit * PUnitLayer::GetUnit(unsigned int& unit_id)
+PUnit * PUnitLayer::GetUnit(unsigned int unit_id)
 {
 	return members.at(unit_id);
 }
@@ -50,7 +50,7 @@ PGraph * PUnitLayer::GetGraph()
 	return graph;
 }
 
-std::unordered_set<unsigned int> PUnitLayer::Nearby(unsigned int& unit_id)
+std::unordered_set<unsigned int> PUnitLayer::Nearby(unsigned int unit_id)
 {
 	PUnit* current = members.at(unit_id);
 	std::unordered_set<unsigned int> results;

@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <limits>
 
-float EuclideanDistance(blaze::StaticVector<float, 3> a, blaze::StaticVector<float, 3> b) {
+float EuclideanDistance(blaze::StaticVector<float, 3>& a, blaze::StaticVector<float, 3>& b) {
 	blaze::StaticVector<float, 3> direction = b - a;
 	return blaze::length(direction);
 }
@@ -26,7 +26,7 @@ std::vector<blaze::StaticVector<float, 3>>* reconstruct_path(std::unordered_map<
 	return result;
 }
 
-std::vector<blaze::StaticVector<float, 3>>* Pathfinding::a_star(PGraph * graph, blaze::StaticVector<float, 3> from, blaze::StaticVector<float, 3> to)
+std::vector<blaze::StaticVector<float, 3>>* Pathfinding::a_star(PGraph * graph, blaze::StaticVector<float, 3>& from, blaze::StaticVector<float, 3>& to)
 {
 	PGraphNode* from_node = graph->NodeAt(from);
 	PGraphNode* to_node = graph->NodeAt(to);

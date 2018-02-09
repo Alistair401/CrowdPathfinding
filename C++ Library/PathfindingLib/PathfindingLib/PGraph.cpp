@@ -6,7 +6,7 @@ void add_edge(PGraphNode* a, PGraphNode* b) {
 	b->neighbors.push_back(a);
 }
 
-PGraphNode* PGraph::NodeAt(blaze::StaticVector<float, 3> position) {
+PGraphNode* PGraph::NodeAt(blaze::StaticVector<float, 3>& position) {
 	int max_x_index = static_cast<int>(std::floor(dimensions[0] / scale));
 	int max_y_index = static_cast<int>(std::floor(dimensions[1] / scale));
 	int max_z_index = static_cast<int>(std::floor(dimensions[2] / scale));
@@ -31,11 +31,11 @@ PGraphNode* PGraph::NodeAt(blaze::StaticVector<float, 3> position) {
 	return graph->at(blaze::StaticVector<int, 3>{x_index, y_index, z_index});
 }
 
-PGraphNode* PGraph::NodeAtIndex(blaze::StaticVector<int, 3> index) {
+PGraphNode* PGraph::NodeAtIndex(blaze::StaticVector<int, 3>& index) {
 	return graph->at(index);
 }
 
-PGraph::PGraph(blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale)
+PGraph::PGraph(blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale)
 {
 	this->origin = origin;
 	this->scale = scale;

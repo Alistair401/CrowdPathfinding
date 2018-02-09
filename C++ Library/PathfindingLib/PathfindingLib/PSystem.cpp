@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "PSystem.h"
 
-void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3> origin, blaze::StaticVector<float, 3> dimensions, float scale) {
+void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale) {
 	PGraph* graph = new PGraph(origin, dimensions, scale);
 	layers.at(layer_id)->SetGraph(graph);
 }
@@ -12,7 +12,7 @@ PGraph* PSystem::GetGraph(unsigned int layer_id)
 	return l->GetGraph();
 }
 
-unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3> position, unsigned int layer_id)
+unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3>& position, unsigned int layer_id)
 {
 	// Create the unit
 	PUnit* unit = new PUnit(position);
@@ -31,26 +31,26 @@ unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3> position, unsigne
 	return id;
 }
 
-void PSystem::UpdateUnitTarget(unsigned int& id, blaze::StaticVector<float, 3>& target)
+void PSystem::UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3>& target)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateTarget(target);
 }
 
-void PSystem::UpdateUnitPosition(unsigned int& id, blaze::StaticVector<float, 3>& position)
+void PSystem::UpdateUnitPosition(unsigned int id, blaze::StaticVector<float, 3>& position)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdatePosition(position);
 	layer->UpdateUnit(id);
 }
 
-void PSystem::UpdateUnitHeading(unsigned int& id, blaze::StaticVector<float, 3>& heading)
+void PSystem::UpdateUnitHeading(unsigned int id, blaze::StaticVector<float, 3>& heading)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateHeading(heading);
 }
 
-void PSystem::DestroyUnit(unsigned int& id)
+void PSystem::DestroyUnit(unsigned int id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	PUnit* unit = layer->GetUnit(id);
@@ -59,7 +59,7 @@ void PSystem::DestroyUnit(unsigned int& id)
 	delete unit;
 }
 
-blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int& id)
+blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	PUnit* current = layer->GetUnit(id);
@@ -112,7 +112,7 @@ void PSystem::CreateLayer(unsigned int layer_id)
 	}
 }
 
-PUnit * PSystem::GetUnit(unsigned int& unit_id)
+PUnit * PSystem::GetUnit(unsigned int unit_id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(unit_id));
 	PUnit* unit = layer->GetUnit(unit_id);

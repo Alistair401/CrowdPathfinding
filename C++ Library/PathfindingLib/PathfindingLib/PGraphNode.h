@@ -19,7 +19,7 @@ public:
 
 	blaze::StaticVector<float, 3> position;
 	blaze::StaticVector<int, 3> index;
-	boolean obstacle;
+	bool obstacle;
 	std::vector<PGraphNode*> neighbors;
 	bool operator==(PGraphNode& other) const {
 		return this->index == other.index;

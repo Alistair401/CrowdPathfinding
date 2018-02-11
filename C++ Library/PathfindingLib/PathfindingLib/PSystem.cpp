@@ -2,9 +2,10 @@
 #include "PSystem.h"
 #include "Pathfinding.h"
 
-void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale) {
+PGraph* PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale) {
 	PGraph* graph = new PGraph(origin, dimensions, scale);
 	layers.at(layer_id)->SetGraph(graph);
+	return graph;
 }
 
 PGraph* PSystem::GetGraph(unsigned int layer_id)
@@ -68,7 +69,6 @@ blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 	blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> target_vector{0,0,0};
-
 
 	current->SetLeader(0);
 

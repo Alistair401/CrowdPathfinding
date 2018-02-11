@@ -51,6 +51,7 @@ std::vector<blaze::StaticVector<float, 3>>* Pathfinding::a_star(PGraph * graph, 
 		for (size_t i = 0; i < current->neighbors.size(); i++)
 		{
 			PGraphNode* neighbor = current->neighbors.at(i);
+			if (neighbor->obstacle) continue;
 			if (closed_set.find(neighbor->index) != closed_set.end()) {
 				continue;
 			}

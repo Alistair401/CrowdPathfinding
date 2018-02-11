@@ -13,6 +13,7 @@ public:
 	void SetTarget(float x, float y);
 	~Unit();
 private:
+	bool complete = false;
 	unsigned int system_id;
 	blaze::StaticVector<float, 2> target{ 0,0 };
 	blaze::StaticVector<float, 2> vel{ 0,0 };

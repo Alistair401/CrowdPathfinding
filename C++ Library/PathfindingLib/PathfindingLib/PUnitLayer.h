@@ -14,17 +14,24 @@ class PUnitLayer
 {
 public:
 	unsigned int id;
+
 	void AddUnit(PUnit*, unsigned int unit_id);
 	void RemoveUnit(unsigned int unit_id);
 	void UpdateUnit(unsigned int unit_id);
 	PUnit* GetUnit(unsigned int unit_id);
-	std::unordered_set<unsigned int> Nearby(unsigned int unit_id);
+
+	void SetPath(unsigned int unit_id, std::vector<blaze::StaticVector<float, 3>>* path);
+	std::vector<blaze::StaticVector<float, 3>>* GetPath(unsigned int unit_id);
+
 	void SetGraph(PGraph* graph);
 	PGraph* GetGraph();
+
+	std::unordered_set<unsigned int> Nearby(unsigned int unit_id);
 private:
-	PGraph* graph = nullptr;
+	PGraph * graph = nullptr;
 	std::unordered_map<unsigned int, PUnit*> members;
 	std::unordered_map<blaze::StaticVector<int, 3>, std::unordered_set<unsigned int>, PGraphNode::IndexHash> node_contents;
 	std::unordered_map<unsigned int, blaze::StaticVector<int, 3>> node_allocation;
+	std::unordered_map<unsigned int, std::vector<blaze::StaticVector<float, 3>>*> path_allocation;
 };
 

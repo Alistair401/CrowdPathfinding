@@ -8,12 +8,13 @@ Unit::Unit(float x, float y)
 {
 	this->x = x;
 	this->y = y;
-	system_id = PSystem::GetInstance().CreateUnit(blaze::StaticVector<float, 3>{x, y, 0},0);
+	system_id = PSystem::GetInstance().CreateUnit(blaze::StaticVector<float, 3>{x, y, 0}, 0);
 	SetTarget(x, y);
 }
 
 void Unit::Draw(cairo_t * cr)
 {
+	if (complete) return;
 	cairo_set_source_rgb(cr, 0, 0, 1);
 	cairo_set_line_width(cr, 1);
 
@@ -23,26 +24,33 @@ void Unit::Draw(cairo_t * cr)
 
 Unit::~Unit()
 {
+	if (complete) return;
 	PSystem::GetInstance().DestroyUnit(system_id);
 }
 
 void Unit::AddForce(float x, float y) {
 	// assumes mass = 1 and delta_time = 1 since we're not too bothered about the phyiscs
-	vel[0] += x;
-	vel[1] += y;
+	vel += blaze::StaticVector<float, 2>{ x, y };
 }
 
 void Unit::Update()
 {
-	UpdateForces();
-	UpdateVelocity();
+	if (complete) return;
+	float sqr_target_distance = blaze::sqrLength(blaze::StaticVector<float, 2>{x, y} -target);
+	if (sqr_target_distance < 49.0) {
+		complete = true;
+		PSystem::GetInstance().DestroyUnit(system_id);
+	}
+	else {
+		UpdateForces();
+		UpdateVelocity();
+	}
 }
 
 void Unit::SetTarget(float x, float y)
 {
-	target[0] = x;
-	target[1] = y;
-	PSystem::GetInstance().UpdateUnitTarget(system_id, blaze::StaticVector<float, 3>{x, y, 0});
+	target = blaze::StaticVector<float, 2>{ x, y };
+	PSystem::GetInstance().UpdateUnitTarget(system_id, blaze::StaticVector<float, 3>{ x, y, 0 });
 }
 
 void Unit::UpdateVelocity() {

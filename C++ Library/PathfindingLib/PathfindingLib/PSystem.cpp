@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "PSystem.h"
+#include "Pathfinding.h"
 
 void PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale) {
 	PGraph* graph = new PGraph(origin, dimensions, scale);
@@ -66,42 +67,69 @@ blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 	std::unordered_set<unsigned int> &nearby = layer->Nearby(id);
 	blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
 	blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
-	blaze::StaticVector<float, 3> following_vector{ 0,0,0 };
-	blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
-	blaze::StaticVector<float, 3> resultant_vector{ 0,0,0 };
+	blaze::StaticVector<float, 3> target_vector{0,0,0};
 
-	unsigned int leader_id = current->GetLeader();
-	if (leader_id == 0) {
-		target_vector = current->GetTarget() - current->GetPosition();
-	}
-	else {
-		PUnit* leader = GetUnit(leader_id);
-		following_vector = leader->GetPosition() - current->GetPosition();
-	}
+
+	current->SetLeader(0);
+
+	// Evaluate nearby units for flocking behaviours
 	if (nearby.size() > 0) {
-		int actual_neighbours = 0;
 		for (auto it = nearby.begin(); it != nearby.end(); it++)
 		{
 			unsigned int nearby_id = (*it);
 			PUnit* u = layer->GetUnit(nearby_id);
 			if (u == current) continue;
-			blaze::StaticVector<float, 3> separating_vector = u->GetPosition() - current->GetPosition();
-			float separating_distance = blaze::sqrLength(separating_vector);
-			separation_vector = separation_vector + (separating_vector / separating_distance);
+
+			blaze::StaticVector<float, 3> const& separating_vector = u->GetPosition() - current->GetPosition();
+
+			float sqr_separating_distance = blaze::sqrLength(separating_vector);
+			float sqr_nearby_target_distance = blaze::sqrLength(u->GetPosition() - u->GetTarget());
+			float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - u->GetTarget());
+			float sqr_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
+			if (sqr_separating_distance < leader_distance_threshold // Unit is close enough to consider as a leader
+				&& sqr_nearby_target_distance < sqr_target_distance // Unit is closer than this one to its target
+				&& sqr_target_similarity < target_similarity_threshold // Unit has a similar enough target
+				) current->SetLeader(nearby_id);
+
+			separation_vector = separation_vector + (separating_vector / sqr_separating_distance);
 			cohesion_vector = cohesion_vector + u->GetPosition();
-			actual_neighbours++;
 		}
-		if (actual_neighbours > 0) {
-			separation_vector = separation_vector * -1;
-			cohesion_vector = (cohesion_vector / static_cast<int>(nearby.size())) - current->GetPosition();
-		}
+		separation_vector = separation_vector * -1.0f;
+		cohesion_vector = (cohesion_vector / static_cast<float>(nearby.size())) - current->GetPosition();
 	}
+	else {
+		current->SetLeader(0);
+	}
+
+	unsigned int leader_id = current->GetLeader();
+	if (leader_id == 0) {
+		// Calculate and save a path to the target
+		std::vector<blaze::StaticVector<float, 3>>* path = layer->GetPath(id);
+		if (path == nullptr) {
+			path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
+			layer->SetPath(id, path);
+		}
+		blaze::StaticVector<float, 3>& next = path->back();
+		float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+		while (sqr_next_distance < 36 && path->size() > 1) {
+			path->pop_back();
+			next = path->back();
+			sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+		}
+		target_vector = next - current->GetPosition();
+		target_vector = target_vector / std::sqrt(sqr_next_distance);
+	}
+	else {
+		PUnit* leader = GetUnit(leader_id);
+		target_vector = leader->GetPosition() - current->GetPosition();
+		target_vector = target_vector / blaze::length(leader->GetPosition() - current->GetPosition());
+	}
+
 	separation_vector = separation_vector * separation_factor;
 	cohesion_vector = cohesion_vector * cohesion_factor;
-	following_vector = following_vector * following_factor;
 	target_vector = target_vector * target_factor;
 
-	resultant_vector = separation_vector + cohesion_vector + following_vector + target_vector;
+	blaze::StaticVector<float, 3> const& resultant_vector = separation_vector + cohesion_vector + target_vector;
 	return resultant_vector;
 }
 

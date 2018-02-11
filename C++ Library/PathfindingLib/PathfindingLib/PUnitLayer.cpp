@@ -40,6 +40,18 @@ PUnit * PUnitLayer::GetUnit(unsigned int unit_id)
 	return members.at(unit_id);
 }
 
+std::vector<blaze::StaticVector<float, 3>>* PUnitLayer::GetPath(unsigned int unit_id)
+{
+	if (path_allocation.find(unit_id) == path_allocation.end()) return nullptr;
+	return path_allocation.at(unit_id);
+}
+
+void PUnitLayer::SetPath(unsigned int unit_id, std::vector<blaze::StaticVector<float, 3>>* path)
+{
+	if (path_allocation.find(unit_id) != path_allocation.end()) delete path_allocation.at(unit_id);
+	path_allocation[unit_id] = path;
+}
+
 void PUnitLayer::SetGraph(PGraph * graph)
 {
 	this->graph = graph;
@@ -59,7 +71,11 @@ std::unordered_set<unsigned int> PUnitLayer::Nearby(unsigned int unit_id)
 
 	std::unordered_set<unsigned int>& center_contents = node_contents.at(node_allocation.at(unit_id));
 
-	results.insert(center_contents.begin(),center_contents.end());
+	for (auto it = center_contents.begin(); it != center_contents.end(); it++)
+	{
+		if (members.at(*it) == current) continue;
+		results.insert(*it);
+	}
 
 	std::vector<PGraphNode*>& neighbors = graph->NodeAtIndex(node_allocation.at(unit_id))->neighbors;
 	for (size_t i = 0; i < neighbors.size(); i++)

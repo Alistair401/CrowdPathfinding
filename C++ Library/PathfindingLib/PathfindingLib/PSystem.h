@@ -37,9 +37,9 @@ private:
 	// Unit Interaction
 	float cohesion_factor = 0.001f;
 	float separation_factor = 1;
-	float alignment_factor = 0 /*0.1*/;
-	float following_factor = 0.01f;
-	float target_factor = 0.01f;
+	float target_factor = 0.1f;
+	float leader_distance_threshold = 50;
+	float target_similarity_threshold = 50;
 	// Layer Management
 	std::unordered_map<unsigned int, PUnitLayer*> layers;
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;

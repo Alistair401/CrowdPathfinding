@@ -15,7 +15,7 @@
 
 std::string environment_file = "sparse.csv";
 
-int population = 40;
+int population = 50;
 int target_count = 5;
 
 int window_width = 800;

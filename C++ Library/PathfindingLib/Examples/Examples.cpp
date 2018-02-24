@@ -24,7 +24,7 @@ int window_height = 600;
 int canvas_width = 0;
 int canvas_height = 0;
 
-float graph_scale = 16;
+float graph_scale = 25;
 
 std::vector<Unit*> units;
 std::vector<Target*> targets;

@@ -8,10 +8,7 @@ class PSystem
 {
 public:
 	// Singleton
-	static PSystem& GetInstance() {
-		static PSystem instance;
-		return instance;
-	}
+	static PSystem& GetInstance();
 	PSystem(PSystem const&) = delete;
 	void operator=(PSystem const&) = delete;
 	// Graph Management
@@ -29,7 +26,7 @@ public:
 	void CreateLayer(unsigned int layer_id);
 private:
 	// Singleton
-	PSystem() {};
+	PSystem();
 	// Unit Management
 	unsigned int next_unit_id = 1;
 	std::vector<unsigned int> free_unit_ids;

@@ -72,6 +72,10 @@ void PSystem::DestroyUnit(unsigned int id)
 	delete unit;
 }
 
+void PSystem::UpdateInteractions()
+{
+}
+
 blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
@@ -246,17 +250,17 @@ PSystem::PSystem()
 	glGenBuffers(1, &ssbo_id);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, ssbo_index, ssbo_id);
 
-	glm::vec4 test[] = { {0,0,0,0} };
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 4 * sizeof(GLfloat), &test[0], GL_STATIC_DRAW);
+	//glm::vec4 test[] = { {0,0,0,0} };
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, 4 * sizeof(GLfloat), &test[0], GL_STATIC_DRAW);
 
-	glDispatchCompute(1, 1, 1);
+	//glDispatchCompute(1, 1, 1);
 
-	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 4 * sizeof(GLfloat), &test[0]);
+	//glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 4 * sizeof(GLfloat), &test[0]);
 
-	printf("%f\n", test[0].x);
-	printf("%f\n", test[0].y);
-	printf("%f\n", test[0].z);
-	printf("%f\n", test[0].w);
+	//printf("%f\n", test[0].x);
+	//printf("%f\n", test[0].y);
+	//printf("%f\n", test[0].z);
+	//printf("%f\n", test[0].w);
 }
 
 PUnit * PSystem::GetUnit(unsigned int unit_id)

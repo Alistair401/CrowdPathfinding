@@ -21,6 +21,7 @@ public:
 	void UpdateUnitHeading(unsigned int id, blaze::StaticVector<float, 3>& heading);
 	void DestroyUnit(unsigned int id);
 	// Unit Interaction
+	void UpdateInteractions();
 	blaze::StaticVector<float, 3> GetUnitForce(unsigned int id);
 	// Layer Management
 	void CreateLayer(unsigned int layer_id);

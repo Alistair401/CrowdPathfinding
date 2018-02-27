@@ -3,6 +3,7 @@
 #include "PGraph.h"
 #include "PUnit.h"
 #include "PUnitLayer.h"
+#include "GL\glew.h"
 
 class PSystem
 {
@@ -33,6 +34,7 @@ private:
 	std::vector<unsigned int> free_unit_ids;
 	PUnit* GetUnit(unsigned int unit_id);
 	// Unit Interaction
+	std::unordered_map<unsigned int, blaze::StaticVector<float, 3>> forces;
 	float cohesion_factor = 0.001f;
 	float separation_factor = 1;
 	float target_factor = 0.1f;
@@ -41,4 +43,15 @@ private:
 	// Layer Management
 	std::unordered_map<unsigned int, PUnitLayer*> layers;
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;
+	// OpenGL
+	GLuint unit_ssbo_index;
+	GLuint unit_ssbo;
+	GLuint count_ssbo_index;
+	GLuint count_ssbo;
+	GLuint index_ssbo_index;
+	GLuint index_ssbo;
+	GLuint neighbor_ssbo_index;
+	GLuint neighbor_ssbo;
+	GLuint output_ssbo_index;
+	GLuint output_ssbo;
 };

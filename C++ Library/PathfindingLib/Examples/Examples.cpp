@@ -55,6 +55,7 @@ void update_units() {
 	{
 		units.at(i)->Update();
 	}
+	PSystem::GetInstance().UpdateInteractions();
 }
 
 static gboolean tick(GtkWidget* widget) {
@@ -138,7 +139,7 @@ void init_targets(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
 	targets.clear();
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(-1.0, 1.0);
+	std::uniform_real_distribution<> dis(-5.0, 5.0);
 	for (int i = 0; i < target_count; i++)
 	{
 		blaze::StaticVector<float, 3> random_position = open_positions.at(std::rand() % open_positions.size());
@@ -154,7 +155,7 @@ void init_units(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(-1.0, 1.0);
+	std::uniform_real_distribution<> dis(-5.0, 5.0);
 	for (int i = 0; i < population; i++)
 	{
 		blaze::StaticVector<float, 3> random_position = open_positions.at(std::rand() % open_positions.size());

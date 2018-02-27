@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "PSystem.h"
 #include "Pathfinding.h"
-#include "GL\glew.h"
 #include "GLFW\glfw3.h"
 #include "glm\glm.hpp"
 #include <fstream>
+
+glm::vec4 ToGLMVec4(blaze::StaticVector<float, 3>& blaze_vec) {
+	return glm::vec4(blaze_vec.at(0), blaze_vec.at(1), blaze_vec.at(2), 0);
+}
 
 PSystem& PSystem::GetInstance()
 {
@@ -74,78 +77,144 @@ void PSystem::DestroyUnit(unsigned int id)
 
 void PSystem::UpdateInteractions()
 {
+	std::vector<unsigned int> unit_ids;
+	std::vector<glm::vec4> unit_buffer;
+	std::vector<GLuint> count_buffer;
+	std::vector<GLuint> index_buffer;
+	std::vector<glm::vec4> neighbor_buffer;
+
+	for (auto unit_it = layer_allocation.begin(); unit_it != layer_allocation.end(); unit_it++) {
+		unsigned int unit_id = (*unit_it).first;
+		PUnitLayer* layer = layers.at(layer_allocation.at(unit_id));
+		PUnit* current = layer->GetUnit(unit_id);
+		std::unordered_set<unsigned int> &nearby = layer->Nearby(unit_id);
+
+		if (nearby.size() > 0) {
+			unit_ids.push_back(unit_id);
+			unit_buffer.push_back(ToGLMVec4(current->GetPosition()));
+			if (index_buffer.size() == 0) {
+				index_buffer.push_back(0);
+			}
+			else {
+				index_buffer.push_back(index_buffer.back() + count_buffer.back());
+			}
+			count_buffer.push_back(static_cast<unsigned int>(nearby.size()));
+
+			for (auto neighbor_it = nearby.begin(); neighbor_it != nearby.end(); neighbor_it++)
+			{
+				PUnit* neighbor = layer->GetUnit(*neighbor_it);
+				neighbor_buffer.push_back(ToGLMVec4(neighbor->GetPosition()));
+			}
+		}
+	}
+	if (unit_buffer.size() == 0) {
+		return;
+	}
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, unit_ssbo_index, unit_ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, unit_buffer.size() * 4 * sizeof(GLfloat), &unit_buffer[0], GL_STATIC_DRAW);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, count_ssbo_index, count_ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, count_buffer.size() * sizeof(GLuint), &count_buffer[0], GL_STATIC_DRAW);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index_ssbo_index, index_ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, index_buffer.size() * sizeof(GLuint), &index_buffer[0], GL_STATIC_DRAW);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, neighbor_ssbo_index, neighbor_ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, neighbor_buffer.size() * 4 * sizeof(GLfloat), &neighbor_buffer[0], GL_STATIC_DRAW);
+
+	std::vector<glm::vec4> output;
+	output.resize(unit_buffer.size());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, output_ssbo_index, output_ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, output.size() * 4 * sizeof(GLfloat), &output[0], GL_STATIC_DRAW);
+
+	glDispatchCompute(static_cast<unsigned int>(unit_buffer.size()), 1, 1);
+
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, output.size() * 4 * sizeof(GLfloat), &output[0]);
+
+	for (size_t i = 0; i < unit_ids.size(); i++)
+	{
+		glm::vec4& f = output[i];
+		forces[unit_ids.at(i)] = blaze::StaticVector<float, 3>{f.x,f.y,f.z};
+	}
 }
 
 blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
 {
-	PUnitLayer* layer = layers.at(layer_allocation.at(id));
-	PUnit* current = layer->GetUnit(id);
-	std::unordered_set<unsigned int> &nearby = layer->Nearby(id);
-	blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
-	blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
-	blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
+	//PUnitLayer* layer = layers.at(layer_allocation.at(id));
+	//PUnit* current = layer->GetUnit(id);
+	//blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
+	//blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
+	//blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
+	//std::unordered_set<unsigned int> &nearby = layer->Nearby(id);
 
-	current->SetLeader(0);
+	//current->SetLeader(0);
 
-	// Evaluate nearby units for flocking behaviours
-	if (nearby.size() > 0) {
-		for (auto it = nearby.begin(); it != nearby.end(); it++)
-		{
-			unsigned int nearby_id = (*it);
-			PUnit* u = layer->GetUnit(nearby_id);
-			if (u == current) continue;
+	//// Evaluate nearby units for flocking behaviours
+	//if (nearby.size() > 0) {
+	//	for (auto it = nearby.begin(); it != nearby.end(); it++)
+	//	{
+	//		unsigned int nearby_id = (*it);
+	//		PUnit* u = layer->GetUnit(nearby_id);
+	//		if (u == current) continue;
 
-			blaze::StaticVector<float, 3> const& separating_vector = u->GetPosition() - current->GetPosition();
+	//		blaze::StaticVector<float, 3> const& separating_vector = u->GetPosition() - current->GetPosition();
 
-			float sqr_separating_distance = blaze::sqrLength(separating_vector);
-			float sqr_nearby_target_distance = blaze::sqrLength(u->GetPosition() - u->GetTarget());
-			float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - u->GetTarget());
-			float sqr_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
-			if (sqr_separating_distance < leader_distance_threshold // Unit is close enough to consider as a leader
-				&& sqr_nearby_target_distance < sqr_target_distance // Unit is closer than this one to its target
-				&& sqr_target_similarity < target_similarity_threshold // Unit has a similar enough target
-				) current->SetLeader(nearby_id);
+	//		float sqr_separating_distance = blaze::sqrLength(separating_vector);
+	//		float sqr_nearby_target_distance = blaze::sqrLength(u->GetPosition() - u->GetTarget());
+	//		float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - u->GetTarget());
+	//		float sqr_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
+	//		if (sqr_separating_distance < leader_distance_threshold // Unit is close enough to consider as a leader
+	//			&& sqr_nearby_target_distance < sqr_target_distance // Unit is closer than this one to its target
+	//			&& sqr_target_similarity < target_similarity_threshold // Unit has a similar enough target
+	//			) current->SetLeader(nearby_id);
 
-			separation_vector = separation_vector + (separating_vector / sqr_separating_distance);
-			cohesion_vector = cohesion_vector + u->GetPosition();
-		}
-		separation_vector = separation_vector * -1.0f;
-		cohesion_vector = (cohesion_vector / static_cast<float>(nearby.size())) - current->GetPosition();
+	//		separation_vector = separation_vector + (separating_vector / sqr_separating_distance);
+	//		cohesion_vector = cohesion_vector + u->GetPosition();
+	//	}
+	//	separation_vector = separation_vector * -1.0f;
+	//	cohesion_vector = (cohesion_vector / static_cast<float>(nearby.size())) - current->GetPosition();
+	//}
+	//else {
+	//	current->SetLeader(0);
+	//}
+
+	//unsigned int leader_id = current->GetLeader();
+	//if (leader_id == 0) {
+	//	// Calculate and save a path to the target
+	//	std::vector<blaze::StaticVector<float, 3>>* path = layer->GetPath(id);
+	//	if (path == nullptr) {
+	//		path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
+	//		layer->SetPath(id, path);
+	//	}
+	//	blaze::StaticVector<float, 3>& next = path->back();
+	//	float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+	//	while (sqr_next_distance < 49 && path->size() > 1) {
+	//		path->pop_back();
+	//		next = path->back();
+	//		sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+	//	}
+	//	target_vector = next - current->GetPosition();
+	//	target_vector = target_vector / std::sqrt(sqr_next_distance);
+	//}
+	//else {
+	//	PUnit* leader = GetUnit(leader_id);
+	//	target_vector = leader->GetPosition() - current->GetPosition();
+	//	target_vector = target_vector / blaze::length(leader->GetPosition() - current->GetPosition());
+	//}
+
+	//separation_vector = separation_vector * separation_factor;
+	//cohesion_vector = cohesion_vector * cohesion_factor;
+	//target_vector = target_vector * target_factor;
+
+	//blaze::StaticVector<float, 3> const& resultant_vector = separation_vector + cohesion_vector + target_vector;
+
+	if (forces.find(id) != forces.end()) {
+		return forces.at(id);
 	}
-	else {
-		current->SetLeader(0);
-	}
-
-	unsigned int leader_id = current->GetLeader();
-	if (leader_id == 0) {
-		// Calculate and save a path to the target
-		std::vector<blaze::StaticVector<float, 3>>* path = layer->GetPath(id);
-		if (path == nullptr) {
-			path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
-			layer->SetPath(id, path);
-		}
-		blaze::StaticVector<float, 3>& next = path->back();
-		float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
-		while (sqr_next_distance < 36 && path->size() > 1) {
-			path->pop_back();
-			next = path->back();
-			sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
-		}
-		target_vector = next - current->GetPosition();
-		target_vector = target_vector / std::sqrt(sqr_next_distance);
-	}
-	else {
-		PUnit* leader = GetUnit(leader_id);
-		target_vector = leader->GetPosition() - current->GetPosition();
-		target_vector = target_vector / blaze::length(leader->GetPosition() - current->GetPosition());
-	}
-
-	separation_vector = separation_vector * separation_factor;
-	cohesion_vector = cohesion_vector * cohesion_factor;
-	target_vector = target_vector * target_factor;
-
-	blaze::StaticVector<float, 3> const& resultant_vector = separation_vector + cohesion_vector + target_vector;
-	return resultant_vector;
+	else return blaze::StaticVector<float, 3>{0, 0, 0};
 }
 
 void PSystem::CreateLayer(unsigned int layer_id)
@@ -214,9 +283,7 @@ PSystem::PSystem()
 	glGetShaderiv(compute_shader_buffer_id, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(compute_shader_buffer_id, 512, NULL, log);
-		printf("COMPUTE SHADER COMPILATION FAILED\n");
 		printf(log);
-		printf("\n");
 	}
 
 	// Link our shader program
@@ -227,40 +294,45 @@ PSystem::PSystem()
 	glGetProgramiv(shader_program_id, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(shader_program_id, 512, NULL, log);
-		printf("SHADER PROGRAM LINKING FAILED\n");
 		printf(log);
-		printf("\n");
 	}
 
 	// Use our newly linked shader program
 	glUseProgram(shader_program_id);
 
-	// Get the index of the SSBO in the shader
-	GLuint ssbo_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "Units");
-	if (ssbo_index == GL_INVALID_INDEX) {
-		printf("COULD NOT RETRIEVE SSBO INDEX");
-	}
+	unit_ssbo_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "unit_buffer");
+	count_ssbo_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "count_buffer");
+	index_ssbo_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "index_buffer");
+	neighbor_ssbo_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "neighbor_buffer");
+	output_ssbo_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "output_buffer");
 
-	// Bind that SSBO to binding point 0
-	GLuint binding_point = 0;
-	glShaderStorageBlockBinding(shader_program_id, ssbo_index, binding_point);
+	glGenBuffers(1, &unit_ssbo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, unit_ssbo_index, unit_ssbo);
+	glGenBuffers(1, &count_ssbo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, count_ssbo_index, count_ssbo);
+	glGenBuffers(1, &index_ssbo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index_ssbo_index, index_ssbo);
+	glGenBuffers(1, &neighbor_ssbo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, neighbor_ssbo_index, neighbor_ssbo);
+	glGenBuffers(1, &output_ssbo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, output_ssbo_index, output_ssbo);
 
-	// Generate a buffer that we can send data to
-	GLuint ssbo_id;
-	glGenBuffers(1, &ssbo_id);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, ssbo_index, ssbo_id);
+	glShaderStorageBlockBinding(shader_program_id, unit_ssbo, 1);
+	glShaderStorageBlockBinding(shader_program_id, count_ssbo, 2);
+	glShaderStorageBlockBinding(shader_program_id, index_ssbo, 3);
+	glShaderStorageBlockBinding(shader_program_id, neighbor_ssbo, 4);
+	glShaderStorageBlockBinding(shader_program_id, output_ssbo, 5);
 
-	//glm::vec4 test[] = { {0,0,0,0} };
-	//glBufferData(GL_SHADER_STORAGE_BUFFER, 4 * sizeof(GLfloat), &test[0], GL_STATIC_DRAW);
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, 4 * sizeof(GLuint), &testb[0], GL_STATIC_DRAW);
 
-	//glDispatchCompute(1, 1, 1);
+	//glDispatchCompute(4, 1, 1);
+
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, unit_ssbo_index, unit_ssbo);
 
 	//glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 4 * sizeof(GLfloat), &test[0]);
 
-	//printf("%f\n", test[0].x);
-	//printf("%f\n", test[0].y);
-	//printf("%f\n", test[0].z);
-	//printf("%f\n", test[0].w);
 }
 
 PUnit * PSystem::GetUnit(unsigned int unit_id)

@@ -60,7 +60,6 @@ void Unit::UpdateVelocity() {
 	this->x += vel.at(0);
 	this->y += vel.at(1);
 	PSystem::GetInstance().UpdateUnitPosition(system_id, blaze::StaticVector<float, 3>{x, y, 0});
-	PSystem::GetInstance().UpdateUnitHeading(system_id, blaze::StaticVector<float, 3>{vel.at(0), vel.at(1), 0});
 }
 
 void Unit::UpdateForces() {

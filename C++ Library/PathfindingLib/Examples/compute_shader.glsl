@@ -32,17 +32,20 @@ const float separation = 1.0f;
 
 void main(){
     vec4 pos = units[gl_WorkGroupID.x];
-    vec4 resultant;
-    vec4 separation_force;
-    vec4 cohesion_force;
-    for (int i = 0; i < counts[gl_WorkGroupID.x]; i++){
-        vec4 neighbor_pos = neighbors[index[gl_WorkGroupID.x] + i];
-        vec4 separating_vector = pos - neighbor_pos;
-        separation_force = separation_force + (separating_vector / dot(separating_vector,separating_vector));
-        cohesion_force = cohesion_force + neighbor_pos;
+    vec4 resultant = vec4(0.0);
+    if (counts[gl_WorkGroupID.x] > 0)
+    {
+        vec4 separation_force;
+        vec4 cohesion_force;
+        for (int i = 0; i < counts[gl_WorkGroupID.x]; i++){
+            vec4 neighbor_pos = neighbors[index[gl_WorkGroupID.x] + i];
+            vec4 separating_vector = pos - neighbor_pos;
+            separation_force = separation_force + (separating_vector / dot(separating_vector,separating_vector));
+            cohesion_force = cohesion_force + neighbor_pos;
+        }
+        cohesion_force = ((cohesion_force / counts[gl_WorkGroupID.x]) - pos) * cohesion;
+        separation_force = separation_force * separation;
+        resultant = separation_force + cohesion_force;
     }
-    cohesion_force = ((cohesion_force / counts[gl_WorkGroupID.x]) - pos) * cohesion;
-    separation_force = separation_force * separation;
-    resultant = separation_force + cohesion_force;
     outputs[gl_WorkGroupID.x] = resultant;
 }

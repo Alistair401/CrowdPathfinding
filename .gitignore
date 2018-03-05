@@ -42,3 +42,4 @@ C++ Library/PathfindingLib/Examples/x64/
 *.pdb
 *.psess
 *.vspx
+*.vsp

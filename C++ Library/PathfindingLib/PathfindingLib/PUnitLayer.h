@@ -34,4 +34,3 @@ private:
 	std::unordered_map<unsigned int, blaze::StaticVector<int, 3>> node_allocation;
 	std::unordered_map<unsigned int, std::vector<blaze::StaticVector<float, 3>>*> path_allocation;
 };
-

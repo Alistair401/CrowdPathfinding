@@ -22,7 +22,6 @@ std::vector<blaze::StaticVector<float, 3>>* reconstruct_path(std::unordered_map<
 		current = came_from->at(current->index);
 		result->push_back(current->position);
 	}
-	//std::reverse(result->begin(), result->end());
 	return result;
 }
 

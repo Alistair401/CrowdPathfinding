@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "NodeMinHeap.h"
 
-NodeMinHeap::NodeMinHeap(std::unordered_map<blaze::StaticVector<int, 3>, float, PGraphNode::IndexHash>* f_score_map)
+NodeMinHeap::NodeMinHeap(std::unordered_map<IVector3, float, IVector3Hash>* f_score_map)
 {
 	this->f_score = f_score_map;
 }
@@ -58,7 +58,7 @@ bool NodeMinHeap::Contains(PGraphNode * n)
 	return SearchFor(n->index, 0) != -1;
 }
 
-int NodeMinHeap::SearchFor(blaze::StaticVector<int, 3> value, int current_index) {
+int NodeMinHeap::SearchFor(IVector3 value, int current_index) {
 	if (data.at(current_index)->index == value) {
 		return current_index;
 	}

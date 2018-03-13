@@ -151,6 +151,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common.h" />
     <ClInclude Include="NodeMinHeap.h" />
     <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="PGraph.h" />

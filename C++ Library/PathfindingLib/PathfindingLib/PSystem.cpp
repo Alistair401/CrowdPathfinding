@@ -5,7 +5,7 @@
 #include "glm\glm.hpp"
 #include <fstream>
 
-glm::vec4 ToGLMVec4(blaze::StaticVector<float, 3>& blaze_vec) {
+glm::vec4 ToGLMVec4(Vector3& blaze_vec) {
 	return glm::vec4(blaze_vec.at(0), blaze_vec.at(1), blaze_vec.at(2), 0);
 }
 
@@ -16,19 +16,13 @@ PSystem& PSystem::GetInstance()
 	return instance;
 }
 
-PGraph* PSystem::InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale) {
+PGraph* PSystem::InitGraph(unsigned int layer_id, Vector3& origin, Vector3& dimensions, float scale) {
 	PGraph* graph = new PGraph(origin, dimensions, scale);
 	layers.at(layer_id)->SetGraph(graph);
 	return graph;
 }
 
-PGraph* PSystem::GetGraph(unsigned int layer_id)
-{
-	PUnitLayer* l = layers.at(layer_id);
-	return l->GetGraph();
-}
-
-unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3>& position, unsigned int layer_id)
+unsigned int PSystem::CreateUnit(Vector3& position, unsigned int layer_id)
 {
 	// Create the unit
 	PUnit* unit = new PUnit(position);
@@ -47,13 +41,13 @@ unsigned int PSystem::CreateUnit(blaze::StaticVector<float, 3>& position, unsign
 	return id;
 }
 
-void PSystem::UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3>& target)
+void PSystem::UpdateUnitTarget(unsigned int id, Vector3& target)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdateTarget(target);
 }
 
-void PSystem::UpdateUnitPosition(unsigned int id, blaze::StaticVector<float, 3>& position)
+void PSystem::UpdateUnitPosition(unsigned int id, Vector3& position)
 {
 	PUnitLayer* layer = layers.at(layer_allocation.at(id));
 	layer->GetUnit(id)->UpdatePosition(position);
@@ -149,8 +143,8 @@ void PSystem::UpdateInteractions()
 	for (size_t i = 0; i < unit_ids.size(); i++)
 	{
 		glm::vec4& f = output[i];
-		blaze::StaticVector<float, 3> computed_force{ f.x,f.y,f.z };
-		blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
+		Vector3 computed_force{ f.x,f.y,f.z };
+		Vector3 target_vector{ 0,0,0 };
 
 
 		unsigned int id = unit_ids.at(i);
@@ -160,12 +154,12 @@ void PSystem::UpdateInteractions()
 
 		if (leaders.at(i) == 0) {
 			// Calculate and save a path to the target
-			std::vector<blaze::StaticVector<float, 3>>* path = layer->GetPath(id);
+			std::vector<Vector3>* path = layer->GetPath(id);
 			if (path == nullptr) {
 				path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
 				layer->SetPath(id, path);
 			}
-			blaze::StaticVector<float, 3>& next = path->back();
+			Vector3& next = path->back();
 			float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
 			while (sqr_next_distance < 49 && path->size() > 1) {
 				path->pop_back();
@@ -186,80 +180,12 @@ void PSystem::UpdateInteractions()
 	}
 }
 
-blaze::StaticVector<float, 3> PSystem::GetUnitForce(unsigned int id)
+Vector3 PSystem::GetUnitForce(unsigned int id)
 {
-	//PUnitLayer* layer = layers.at(layer_allocation.at(id));
-	//PUnit* current = layer->GetUnit(id);
-	//blaze::StaticVector<float, 3> separation_vector{ 0,0,0 };
-	//blaze::StaticVector<float, 3> cohesion_vector{ 0,0,0 };
-	//blaze::StaticVector<float, 3> target_vector{ 0,0,0 };
-	//std::unordered_set<unsigned int> &nearby = layer->Nearby(id);
-
-	//current->SetLeader(0);
-
-	//// Evaluate nearby units for flocking behaviours
-	//if (nearby.size() > 0) {
-	//	for (auto it = nearby.begin(); it != nearby.end(); it++)
-	//	{
-	//		unsigned int nearby_id = (*it);
-	//		PUnit* u = layer->GetUnit(nearby_id);
-	//		if (u == current) continue;
-
-	//		blaze::StaticVector<float, 3> const& separating_vector = u->GetPosition() - current->GetPosition();
-
-	//		float sqr_separating_distance = blaze::sqrLength(separating_vector);
-	//		float sqr_nearby_target_distance = blaze::sqrLength(u->GetPosition() - u->GetTarget());
-	//		float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - u->GetTarget());
-	//		float sqr_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
-	//		if (sqr_separating_distance < leader_distance_threshold // Unit is close enough to consider as a leader
-	//			&& sqr_nearby_target_distance < sqr_target_distance // Unit is closer than this one to its target
-	//			&& sqr_target_similarity < target_similarity_threshold // Unit has a similar enough target
-	//			) current->SetLeader(nearby_id);
-
-	//		separation_vector = separation_vector + (separating_vector / sqr_separating_distance);
-	//		cohesion_vector = cohesion_vector + u->GetPosition();
-	//	}
-	//	separation_vector = separation_vector * -1.0f;
-	//	cohesion_vector = (cohesion_vector / static_cast<float>(nearby.size())) - current->GetPosition();
-	//}
-	//else {
-	//	current->SetLeader(0);
-	//}
-
-	//unsigned int leader_id = current->GetLeader();
-	//if (leader_id == 0) {
-	//	// Calculate and save a path to the target
-	//	std::vector<blaze::StaticVector<float, 3>>* path = layer->GetPath(id);
-	//	if (path == nullptr) {
-	//		path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
-	//		layer->SetPath(id, path);
-	//	}
-	//	blaze::StaticVector<float, 3>& next = path->back();
-	//	float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
-	//	while (sqr_next_distance < 49 && path->size() > 1) {
-	//		path->pop_back();
-	//		next = path->back();
-	//		sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
-	//	}
-	//	target_vector = next - current->GetPosition();
-	//	target_vector = target_vector / std::sqrt(sqr_next_distance);
-	//}
-	//else {
-	//	PUnit* leader = GetUnit(leader_id);
-	//	target_vector = leader->GetPosition() - current->GetPosition();
-	//	target_vector = target_vector / blaze::length(leader->GetPosition() - current->GetPosition());
-	//}
-
-	//separation_vector = separation_vector * separation_factor;
-	//cohesion_vector = cohesion_vector * cohesion_factor;
-	//target_vector = target_vector * target_factor;
-
-	//blaze::StaticVector<float, 3> const& resultant_vector = separation_vector + cohesion_vector + target_vector;
-
 	if (forces.find(id) != forces.end()) {
 		return forces.at(id);
 	}
-	else return blaze::StaticVector<float, 3>{0, 0, 0};
+	else return Vector3{0, 0, 0};
 }
 
 void PSystem::CreateLayer(unsigned int layer_id)

@@ -1,16 +1,16 @@
 #pragma once
-#include "blaze\Blaze.h"
+#include "Common.h"
 
 class PUnit
 {
 public:
-	PUnit(blaze::StaticVector<float, 3>& position);
+	PUnit(Vector3& position);
 	~PUnit();
-	void UpdatePosition(blaze::StaticVector<float, 3>& position);
-	void UpdateTarget(blaze::StaticVector<float, 3>& target);
-	blaze::StaticVector<float, 3>& GetPosition();
-	blaze::StaticVector<float, 3>& GetTarget();
+	void UpdatePosition(Vector3& position);
+	void UpdateTarget(Vector3& target);
+	Vector3& GetPosition();
+	Vector3& GetTarget();
 private:
-	blaze::StaticVector<float, 3> position;
-	blaze::StaticVector<float, 3> target;
+	Vector3 position;
+	Vector3 target;
 };

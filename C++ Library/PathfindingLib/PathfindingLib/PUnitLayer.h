@@ -1,4 +1,5 @@
 #pragma once
+#include "Common.h"
 #include "PUnit.h"
 #include "PGraphNode.h"
 #include "PGraph.h"
@@ -7,7 +8,6 @@
 #include <unordered_set>
 #include <set>
 #include <list>
-#include "blaze\Blaze.h"
 
 
 class PUnitLayer
@@ -20,8 +20,8 @@ public:
 	void UpdateUnit(unsigned int unit_id);
 	PUnit* GetUnit(unsigned int unit_id);
 
-	void SetPath(unsigned int unit_id, std::vector<blaze::StaticVector<float, 3>>* path);
-	std::vector<blaze::StaticVector<float, 3>>* GetPath(unsigned int unit_id);
+	void SetPath(unsigned int unit_id, std::vector<Vector3>* path);
+	std::vector<Vector3>* GetPath(unsigned int unit_id);
 
 	void SetGraph(PGraph* graph);
 	PGraph* GetGraph();
@@ -30,7 +30,7 @@ public:
 private:
 	PGraph * graph = nullptr;
 	std::unordered_map<unsigned int, PUnit*> members;
-	std::unordered_map<blaze::StaticVector<int, 3>, std::unordered_set<unsigned int>, PGraphNode::IndexHash> node_contents;
-	std::unordered_map<unsigned int, blaze::StaticVector<int, 3>> node_allocation;
-	std::unordered_map<unsigned int, std::vector<blaze::StaticVector<float, 3>>*> path_allocation;
+	std::unordered_map<IVector3, std::unordered_set<unsigned int>, IVector3Hash> node_contents;
+	std::unordered_map<unsigned int, IVector3> node_allocation;
+	std::unordered_map<unsigned int, std::vector<Vector3>*> path_allocation;
 };

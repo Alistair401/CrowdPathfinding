@@ -5,8 +5,8 @@
 #include <unordered_set>
 #include <limits>
 
-float EuclideanDistance(blaze::StaticVector<float, 3>& a, blaze::StaticVector<float, 3>& b) {
-	blaze::StaticVector<float, 3> direction = b - a;
+float EuclideanDistance(Vector3& a, Vector3& b) {
+	Vector3 direction = b - a;
 	return blaze::length(direction);
 }
 
@@ -14,8 +14,8 @@ float HeuristicCostEstimate(PGraphNode* a, PGraphNode* b) {
 	return EuclideanDistance(a->position, b->position);
 }
 
-std::vector<blaze::StaticVector<float, 3>>* reconstruct_path(std::unordered_map<blaze::StaticVector<int, 3>, PGraphNode*, PGraphNode::IndexHash>* came_from, PGraphNode* final_node) {
-	std::vector<blaze::StaticVector<float, 3>>* result = new std::vector<blaze::StaticVector<float, 3>>;
+std::vector<Vector3>* reconstruct_path(std::unordered_map<IVector3, PGraphNode*, IVector3Hash>* came_from, PGraphNode* final_node) {
+	std::vector<Vector3>* result = new std::vector<Vector3>;
 	PGraphNode* current = final_node;
 	result->push_back(current->position);
 	while (came_from->find(current->index) != came_from->end()) {
@@ -25,15 +25,15 @@ std::vector<blaze::StaticVector<float, 3>>* reconstruct_path(std::unordered_map<
 	return result;
 }
 
-std::vector<blaze::StaticVector<float, 3>>* Pathfinding::a_star(PGraph * graph, blaze::StaticVector<float, 3>& from, blaze::StaticVector<float, 3>& to)
+std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3& from, Vector3& to)
 {
 	PGraphNode* from_node = graph->NodeAt(from);
 	PGraphNode* to_node = graph->NodeAt(to);
 
-	std::unordered_map<blaze::StaticVector<int, 3>, float, PGraphNode::IndexHash> f_score;
-	std::unordered_set<blaze::StaticVector<int, 3>, PGraphNode::IndexHash> closed_set;
-	std::unordered_map<blaze::StaticVector<int, 3>, PGraphNode*, PGraphNode::IndexHash> came_from;
-	std::unordered_map<blaze::StaticVector<int, 3>, float, PGraphNode::IndexHash> g_score;
+	std::unordered_map<IVector3, float, IVector3Hash> f_score;
+	std::unordered_set<IVector3, IVector3Hash> closed_set;
+	std::unordered_map<IVector3, PGraphNode*, IVector3Hash> came_from;
+	std::unordered_map<IVector3, float, IVector3Hash> g_score;
 
 	NodeMinHeap open_set(&f_score);
 	f_score.emplace(from_node->index, HeuristicCostEstimate(from_node, to_node)); // must insert into f_score before open_set
@@ -77,5 +77,5 @@ std::vector<blaze::StaticVector<float, 3>>* Pathfinding::a_star(PGraph * graph, 
 		}
 	}
 
-	return new std::vector<blaze::StaticVector<float, 3>>;
+	return new std::vector<Vector3>;
 }

@@ -1,11 +1,11 @@
 #pragma once
-#include "blaze\Blaze.h"
+#include "Common.h"
 #include "PGraph.h"
 #include <vector>
 
 class Pathfinding
 {
 public:
-	static std::vector<blaze::StaticVector<float, 3>>* a_star(PGraph* graph, blaze::StaticVector<float, 3>& from, blaze::StaticVector<float, 3>& to);
+	static std::vector<Vector3>* a_star(PGraph* graph, Vector3& from, Vector3& to);
 };
 

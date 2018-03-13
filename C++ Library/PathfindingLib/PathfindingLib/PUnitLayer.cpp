@@ -11,7 +11,7 @@ void PUnitLayer::RemoveUnit(unsigned int unit_id)
 {
 	members.erase(unit_id);
 	if (node_allocation.find(unit_id) != node_allocation.end()) {
-		blaze::StaticVector<int, 3> old_index = node_allocation.at(unit_id);
+		IVector3 old_index = node_allocation.at(unit_id);
 		node_contents.at(old_index).erase(unit_id);
 		node_allocation.erase(unit_id);
 	}
@@ -20,10 +20,10 @@ void PUnitLayer::RemoveUnit(unsigned int unit_id)
 void PUnitLayer::UpdateUnit(unsigned int unit_id)
 {
 	PUnit* unit = members.at(unit_id);
-	blaze::StaticVector<int, 3> node_index = graph->NodeAt(unit->GetPosition())->index;
+	IVector3 node_index = graph->NodeAt(unit->GetPosition())->index;
 	// If the unit has a previous allocation, remove it
 	if (node_allocation.find(unit_id) != node_allocation.end()) {
-		blaze::StaticVector<int, 3> old_index = node_allocation.at(unit_id);
+		IVector3 old_index = node_allocation.at(unit_id);
 		node_contents.at(old_index).erase(unit_id);
 	}
 	// Create a new set if a node hasn't been seen before
@@ -40,13 +40,13 @@ PUnit * PUnitLayer::GetUnit(unsigned int unit_id)
 	return members.at(unit_id);
 }
 
-std::vector<blaze::StaticVector<float, 3>>* PUnitLayer::GetPath(unsigned int unit_id)
+std::vector<Vector3>* PUnitLayer::GetPath(unsigned int unit_id)
 {
 	if (path_allocation.find(unit_id) == path_allocation.end()) return nullptr;
 	return path_allocation.at(unit_id);
 }
 
-void PUnitLayer::SetPath(unsigned int unit_id, std::vector<blaze::StaticVector<float, 3>>* path)
+void PUnitLayer::SetPath(unsigned int unit_id, std::vector<Vector3>* path)
 {
 	if (path_allocation.find(unit_id) != path_allocation.end()) delete path_allocation.at(unit_id);
 	path_allocation[unit_id] = path;

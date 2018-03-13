@@ -1,5 +1,5 @@
 #pragma once
-#include "blaze\Blaze.h"
+#include "Common.h"
 #include "PGraph.h"
 #include "PUnit.h"
 #include "PUnitLayer.h"
@@ -13,12 +13,11 @@ public:
 	PSystem(PSystem const&) = delete;
 	void operator=(PSystem const&) = delete;
 	// Graph Management
-	PGraph* InitGraph(unsigned int layer_id, blaze::StaticVector<float, 3>& origin, blaze::StaticVector<float, 3>& dimensions, float scale);
-	PGraph* GetGraph(unsigned int layer_id); // DEBUG
+	PGraph* InitGraph(unsigned int layer_id, Vector3& origin, Vector3& dimensions, float scale);
 	// Unit Management
-	unsigned int CreateUnit(blaze::StaticVector<float, 3>& position, unsigned int layer_id);
-	void UpdateUnitTarget(unsigned int id, blaze::StaticVector<float, 3>& target);
-	void UpdateUnitPosition(unsigned int id, blaze::StaticVector<float, 3>& position);
+	unsigned int CreateUnit(Vector3& position, unsigned int layer_id);
+	void UpdateUnitTarget(unsigned int id, Vector3& target);
+	void UpdateUnitPosition(unsigned int id, Vector3& position);
 	void DestroyUnit(unsigned int id);
 	// Unit Interaction
 	void UpdateInteractions();
@@ -33,7 +32,7 @@ private:
 	std::vector<unsigned int> free_unit_ids;
 	PUnit* GetUnit(unsigned int unit_id);
 	// Unit Interaction
-	std::unordered_map<unsigned int, blaze::StaticVector<float, 3>> forces;
+	std::unordered_map<unsigned int, Vector3> forces;
 	float target_factor = 0.1f;
 	float target_similarity_threshold = 50;
 	// Layer Management

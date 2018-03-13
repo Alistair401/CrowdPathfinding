@@ -159,12 +159,16 @@ void PSystem::UpdateInteractions()
 				path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
 				layer->SetPath(id, path);
 			}
-			Vector3& next = path->back();
+			Vector3 next = current->GetTarget();
 			float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
-			while (sqr_next_distance < 49 && path->size() > 1) {
-				path->pop_back();
+			if (!path->empty()) {
 				next = path->back();
 				sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+				while (sqr_next_distance < 49 && path->size() > 1) {
+					path->pop_back();
+					next = path->back();
+					sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+				}
 			}
 			target_vector = next - current->GetPosition();
 			target_vector = target_vector / std::sqrt(sqr_next_distance);

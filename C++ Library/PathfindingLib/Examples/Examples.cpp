@@ -70,14 +70,16 @@ static gboolean tick(GtkWidget* widget) {
 	return TRUE;
 }
 
-std::vector<blaze::StaticVector<float, 3>> init_graph() {
+std::vector<Vector3> init_graph() {
 	PSystem::GetInstance().CreateLayer(0U);
-	blaze::StaticVector<float, 3> origin{ 0, 0, 0 };
+	Vector3 origin{ 0, 0, 0 };
 
 	PGraph* graph = nullptr;
 	float graph_width;
 	float graph_height;
-	std::vector<blaze::StaticVector<float, 3>> obstacles;
+	std::vector<Vector3> obstacles;
+	std::vector<Vector3> open_positions;
+
 
 	if (environment_file == "") {
 		graph_width = static_cast<float>(canvas_width);
@@ -103,9 +105,10 @@ std::vector<blaze::StaticVector<float, 3>> init_graph() {
 			graph_width = (columns - 1) * graph_scale;
 			for (int y = 0; y < rows; y++)
 			{
-				for (int x = 0; x  < columns; x++)
+				for (int x = 0; x < columns; x++)
 				{
-					if (file_data.at(y).at(x)) obstacles.push_back(blaze::StaticVector<float, 3>{x * graph_scale,y * graph_scale,0});
+					if (file_data.at(y).at(x)) obstacles.push_back(Vector3{ x * graph_scale,y * graph_scale,0 });
+					else open_positions.push_back(Vector3{ x * graph_scale,y * graph_scale,0 });
 				}
 			}
 		}
@@ -116,8 +119,7 @@ std::vector<blaze::StaticVector<float, 3>> init_graph() {
 		}
 	}
 
-	
-	blaze::StaticVector<float, 3> dimensions{ graph_width , graph_height , 0 };
+	Vector3 dimensions{ graph_width , graph_height , 0 };
 	graph = PSystem::GetInstance().InitGraph(0U, origin, dimensions, graph_scale);
 
 	for (size_t i = 0; i < obstacles.size(); i++)
@@ -125,14 +127,10 @@ std::vector<blaze::StaticVector<float, 3>> init_graph() {
 		graph->NodeAt(obstacles.at(i))->obstacle = true;
 	}
 
-	std::vector<blaze::StaticVector<float, 3>> open_positions;
-	for (auto it = graph->graph->begin(); it != graph->graph->end(); it++) {
-		if (!(*it).second->obstacle) open_positions.push_back((*it).second->position);
-	}
 	return open_positions;
 }
 
-void init_targets(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
+void init_targets(std::vector<Vector3>& open_positions) {
 	for (int i = 0; i < targets.size(); i++) {
 		delete targets.at(i);
 	}
@@ -142,12 +140,12 @@ void init_targets(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
 	std::uniform_real_distribution<> dis(-5.0, 5.0);
 	for (int i = 0; i < target_count; i++)
 	{
-		blaze::StaticVector<float, 3> random_position = open_positions.at(std::rand() % open_positions.size());
+		Vector3 random_position = open_positions.at(std::rand() % open_positions.size());
 		targets.push_back(new Target(random_position[0] + static_cast<float>(dis(gen)), random_position[1] + static_cast<float>(dis(gen))));
 	}
 }
 
-void init_units(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
+void init_units(std::vector<Vector3>& open_positions) {
 	for (int i = 0; i < units.size(); i++) {
 		delete units.at(i);
 	}
@@ -158,7 +156,7 @@ void init_units(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
 	std::uniform_real_distribution<> dis(-5.0, 5.0);
 	for (int i = 0; i < population; i++)
 	{
-		blaze::StaticVector<float, 3> random_position = open_positions.at(std::rand() % open_positions.size());
+		Vector3 random_position = open_positions.at(std::rand() % open_positions.size());
 		Unit* u = new Unit(random_position[0] + dis(gen), random_position[1] + dis(gen));
 
 		int random_target_index = std::rand() % target_count;
@@ -169,7 +167,7 @@ void init_units(std::vector<blaze::StaticVector<float, 3>>& open_positions) {
 }
 
 static void reset(GtkWidget* widget, gpointer data) {
-	std::vector<blaze::StaticVector<float, 3>> open = init_graph();
+	std::vector<Vector3> open = init_graph();
 	init_targets(open);
 	init_units(open);
 }

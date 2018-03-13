@@ -28,29 +28,32 @@ PGraphNode* PGraph::NodeAt(Vector3& position) {
 		z_index = static_cast<int>(std::round(z_proportion * max_z_index));
 	}
 
-	return graph->at(IVector3{ x_index, y_index, z_index });
+	return NodeAtIndex(IVector3{ x_index, y_index, z_index });
 }
 
 PGraphNode* PGraph::NodeAtIndex(IVector3& index) {
-	return graph->at(index);
+	return grid[index[0]][index[1]][index[2]];
 }
 
 PGraph::PGraph(Vector3& origin, Vector3& dimensions, float scale)
 {
 	this->origin = origin;
 	this->scale = scale;
-	this->graph = new std::unordered_map<IVector3, PGraphNode*, IVector3Hash>();
 
 	int max_x_index = static_cast<int>(std::floor(dimensions[0] / scale));
 	int max_y_index = static_cast<int>(std::floor(dimensions[1] / scale));
 	int max_z_index = static_cast<int>(std::floor(dimensions[2] / scale));
 
+	grid.resize(max_x_index + 1);
+
 	int x_index = 0;
 	for (float i = origin[0]; i <= dimensions[0] + origin[0]; i += scale)
 	{
+		grid[x_index].resize(max_y_index + 1);
 		int	y_index = 0;
 		for (float j = origin[1]; j <= dimensions[1] + origin[1]; j += scale)
 		{
+			grid[x_index][y_index].resize(max_z_index + 1);
 			int z_index = 0;
 			for (float k = origin[2]; k <= dimensions[2] + origin[2]; k += scale)
 			{
@@ -67,29 +70,29 @@ PGraph::PGraph(Vector3& origin, Vector3& dimensions, float scale)
 
 				if (!min_x_edge) {
 					if (!max_y_edge) {
-						if (!min_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index + 1, z_index - 1 }));
-						add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index + 1, z_index }));
-						if (!max_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index + 1, z_index + 1 }));
+						if (!min_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index + 1, z_index - 1 }));
+						add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index + 1, z_index }));
+						if (!max_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index + 1, z_index + 1 }));
 					}
-					if (!min_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index, z_index - 1 }));
-					add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index, z_index }));
-					if (!max_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index, z_index + 1 }));
+					if (!min_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index, z_index - 1 }));
+					add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index, z_index }));
+					if (!max_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index, z_index + 1 }));
 					if (!min_y_edge) {
-						if (!min_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index - 1, z_index - 1 }));
-						add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index - 1, z_index }));
-						if (!max_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index - 1, y_index - 1, z_index + 1 }));
+						if (!min_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index - 1, z_index - 1 }));
+						add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index - 1, z_index }));
+						if (!max_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index - 1, y_index - 1, z_index + 1 }));
 					}
 				}
 				if (!min_y_edge) {
-					if (!min_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index, y_index - 1, z_index - 1 }));
-					add_edge(new_node, this->graph->at(IVector3{ x_index, y_index - 1, z_index }));
-					if (!max_z_edge) add_edge(new_node, this->graph->at(IVector3{ x_index, y_index - 1, z_index + 1 }));
+					if (!min_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index, y_index - 1, z_index - 1 }));
+					add_edge(new_node, NodeAtIndex(IVector3{ x_index, y_index - 1, z_index }));
+					if (!max_z_edge) add_edge(new_node, NodeAtIndex(IVector3{ x_index, y_index - 1, z_index + 1 }));
 				}
 				if (!min_z_edge) {
-					add_edge(new_node, this->graph->at(IVector3{ x_index, y_index, z_index - 1 }));
+					add_edge(new_node, NodeAtIndex(IVector3{ x_index, y_index, z_index - 1 }));
 				}
 
-				this->graph->insert(std::make_pair(index, new_node));
+				grid[x_index][y_index][z_index] = new_node;
 				this->dimensions = { i - origin[0],j - origin[1],k - origin[2] };
 				z_index++;
 			}
@@ -101,12 +104,12 @@ PGraph::PGraph(Vector3& origin, Vector3& dimensions, float scale)
 
 PGraph::~PGraph()
 {
-	if (this->graph) {
-		for (auto it = this->graph->begin(); it != this->graph->end(); it++)
-		{
-			delete it->second;
-		}
-		delete this->graph;
-	}
+	//if (this->graph) {
+	//	for (auto it = this->graph->begin(); it != this->graph->end(); it++)
+	//	{
+	//		delete it->second;
+	//	}
+	//	delete this->graph;
+	//}
 }
 

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "PGraphNode.h"
 #include "blaze\Blaze.h"
+#include <vector>
 
 class PGraph
 {
@@ -11,7 +12,7 @@ public:
 	~PGraph();
 	PGraphNode* PGraph::NodeAt(Vector3& position);
 	PGraphNode* PGraph::NodeAtIndex(IVector3& index);
-	std::unordered_map<IVector3, PGraphNode*, IVector3Hash>* graph;
+	std::vector<std::vector<std::vector<PGraphNode*>>> grid;
 private:
 	Vector3 dimensions;
 	Vector3 origin;

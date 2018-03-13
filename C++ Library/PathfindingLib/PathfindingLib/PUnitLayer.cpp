@@ -46,6 +46,14 @@ std::vector<Vector3>* PUnitLayer::GetPath(unsigned int unit_id)
 	return path_allocation.at(unit_id);
 }
 
+void PUnitLayer::ClearPath(unsigned int unit_id)
+{
+	if (path_allocation.find(unit_id) != path_allocation.end()) {
+		delete path_allocation.at(unit_id);
+		path_allocation.erase(unit_id);
+	}
+}
+
 void PUnitLayer::SetPath(unsigned int unit_id, std::vector<Vector3>* path)
 {
 	if (path_allocation.find(unit_id) != path_allocation.end()) delete path_allocation.at(unit_id);

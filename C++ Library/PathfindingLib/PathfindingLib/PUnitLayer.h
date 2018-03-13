@@ -22,6 +22,7 @@ public:
 
 	void SetPath(unsigned int unit_id, std::vector<Vector3>* path);
 	std::vector<Vector3>* GetPath(unsigned int unit_id);
+	void ClearPath(unsigned int unit_id);
 
 	void SetGraph(PGraph* graph);
 	PGraph* GetGraph();

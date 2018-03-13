@@ -170,6 +170,7 @@ void PSystem::UpdateInteractions()
 			target_vector = target_vector / std::sqrt(sqr_next_distance);
 		}
 		else {
+			layer->ClearPath(id);
 			PUnit* leader = GetUnit(leaders.at(i));
 			target_vector = leader->GetPosition() - current->GetPosition();
 			target_vector = target_vector / blaze::length(leader->GetPosition() - current->GetPosition());

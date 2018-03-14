@@ -77,7 +77,7 @@ void PSystem::UpdateInteractions()
 		unsigned int unit_id = (*unit_it).first;
 		PUnitLayer* layer = layers.at(layer_allocation.at(unit_id));
 		PUnit* current = layer->GetUnit(unit_id);
-		std::unordered_set<unsigned int> &nearby = layer->Nearby(unit_id);
+		std::vector<std::unordered_set<unsigned int>*> nearby = layer->Nearby(unit_id);
 
 		unsigned int leader = 0;
 
@@ -89,25 +89,31 @@ void PSystem::UpdateInteractions()
 		else {
 			index_buffer.push_back(index_buffer.back() + count_buffer.back());
 		}
-		count_buffer.push_back(static_cast<unsigned int>(nearby.size()));
+
+		int neighbor_count = 0;
 
 		if (nearby.size() > 0) {
-			for (auto neighbor_it = nearby.begin(); neighbor_it != nearby.end(); neighbor_it++)
+			for (size_t i = 0; i < nearby.size(); i++)
 			{
-				PUnit* neighbor = layer->GetUnit(*neighbor_it);
+				for (auto neighbor_it = nearby.at(i)->begin(); neighbor_it != nearby.at(i)->end(); neighbor_it++) {
+					if (*neighbor_it == unit_id) continue;
+					PUnit* neighbor = layer->GetUnit(*neighbor_it);
+					neighbor_count++;
 
-				float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - neighbor->GetTarget());
-				if (sqr_target_similarity < target_similarity_threshold) { // units have similar targets
-					float sqr_current_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
-					float sqr_neighbor_target_distance = blaze::sqrLength(neighbor->GetPosition() - neighbor->GetTarget());
-					if (sqr_neighbor_target_distance < sqr_current_target_distance) { // neighbor is closer than current
-						leader = *neighbor_it;
+					float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - neighbor->GetTarget());
+					if (sqr_target_similarity < target_similarity_threshold) { // units have similar targets
+						float sqr_current_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
+						float sqr_neighbor_target_distance = blaze::sqrLength(neighbor->GetPosition() - neighbor->GetTarget());
+						if (sqr_neighbor_target_distance < sqr_current_target_distance) { // neighbor is closer than current
+							leader = *neighbor_it;
+						}
 					}
+					neighbor_buffer.push_back(ToGLMVec4(neighbor->GetPosition()));
 				}
-
-				neighbor_buffer.push_back(ToGLMVec4(neighbor->GetPosition()));
 			}
 		}
+
+		count_buffer.push_back(static_cast<unsigned int>(neighbor_count));
 
 		leaders.push_back(leader);
 	}

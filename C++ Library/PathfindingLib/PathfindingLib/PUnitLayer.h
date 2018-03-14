@@ -27,11 +27,11 @@ public:
 	void SetGraph(PGraph* graph);
 	PGraph* GetGraph();
 
-	std::unordered_set<unsigned int> Nearby(unsigned int unit_id);
+	std::vector<std::unordered_set<unsigned int>*> Nearby(unsigned int unit_id);
 private:
 	PGraph * graph = nullptr;
 	std::unordered_map<unsigned int, PUnit*> members;
-	std::unordered_map<IVector3, std::unordered_set<unsigned int>, IVector3Hash> node_contents;
+	std::unordered_map<IVector3, std::unordered_set<unsigned int>*, IVector3Hash> node_contents;
 	std::unordered_map<unsigned int, IVector3> node_allocation;
 	std::unordered_map<unsigned int, std::vector<Vector3>*> path_allocation;
 };

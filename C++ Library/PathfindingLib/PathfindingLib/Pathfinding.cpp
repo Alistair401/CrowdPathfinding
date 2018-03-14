@@ -25,7 +25,7 @@ std::vector<Vector3>* reconstruct_path(std::unordered_map<IVector3, PGraphNode*,
 	return result;
 }
 
-std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3& from, Vector3& to)
+std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 to)
 {
 	PGraphNode* from_node = graph->NodeAt(from);
 	PGraphNode* to_node = graph->NodeAt(to);

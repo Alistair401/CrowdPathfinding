@@ -45,9 +45,6 @@
     <ClInclude Include="PSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PUnitList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,9 +69,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PUnitList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

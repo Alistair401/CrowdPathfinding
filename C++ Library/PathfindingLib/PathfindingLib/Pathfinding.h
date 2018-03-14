@@ -6,6 +6,6 @@
 class Pathfinding
 {
 public:
-	static std::vector<Vector3>* a_star(PGraph* graph, Vector3& from, Vector3& to);
+	static std::vector<Vector3>* a_star(PGraph* graph, Vector3 from, Vector3 to);
 };
 

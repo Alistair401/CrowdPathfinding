@@ -4,6 +4,7 @@
 #include <random>
 #include <iostream>
 #include <fstream>
+#include <set>
 #include <string>
 #include <blaze\Blaze.h>
 #include <cairo\cairo.h>
@@ -11,11 +12,14 @@
 #include <boost\tokenizer.hpp>
 #include "Unit.h"
 #include "Target.h"
-#include "DrawDebug.h"
+#include "Obstacle.h"
 
 std::string environment_file = "sparse.csv";
 
-int population = 50;
+int population_cap = 60;
+float spawn_chance = 0.2;
+std::vector<Vector3> spawn_locations;
+
 int target_count = 5;
 
 int window_width = 800;
@@ -26,22 +30,41 @@ int canvas_height = 0;
 
 float graph_scale = 25;
 
-std::vector<Unit*> units;
+std::set<Unit*> units;
 std::vector<Target*> targets;
+std::vector<Obstacle*> obstacles;
 
 GtkWidget *drawing_area;
 guint update_timer;
 
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> spawn_chance_distribution(0, 1.0);
+std::uniform_real_distribution<> spawn_location_distribution(-5.0, 5.0);
+
 static void do_drawing(cairo_t *cr)
 {
 	cairo_set_source_rgb(cr, 0, 0, 0);
-	for (int i = 0; i < units.size(); i++)
+	std::vector<Unit*> to_remove;
+	for (auto u: units)
 	{
-		units.at(i)->Draw(cr);
+		if (u->IsComplete()) to_remove.push_back(u);
+		u->Update();
+		u->Draw(cr);
 	}
-	for (int i = 0; i < targets.size(); i++)
+	PSystem::GetInstance().UpdateInteractions();
+
+	for (auto u: to_remove)
 	{
-		targets.at(i)->Draw(cr);
+		units.erase(u);
+	}
+
+	for (auto target : targets) {
+		target->Draw(cr);
+	}
+
+	for (auto obstacle : obstacles) {
+		obstacle->Draw(cr);
 	}
 }
 
@@ -50,12 +73,18 @@ static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	return FALSE;
 }
 
-void update_units() {
-	for (int i = 0; i < units.size(); i++)
-	{
-		units.at(i)->Update();
+void update_population() {
+	if (spawn_locations.empty()) return;
+
+	if (units.size() < population_cap && spawn_chance_distribution(gen) <= spawn_chance) {
+		Vector3 random_position = spawn_locations.at(std::rand() % spawn_locations.size());
+		Unit* u = new Unit(random_position[0] + spawn_location_distribution(gen), random_position[1] + spawn_location_distribution(gen));
+
+		int random_target_index = std::rand() % target_count;
+		Target* random_target = targets.at(random_target_index);
+		u->SetTarget(random_target->x, random_target->y);
+		units.emplace(u);
 	}
-	PSystem::GetInstance().UpdateInteractions();
 }
 
 static gboolean tick(GtkWidget* widget) {
@@ -64,22 +93,21 @@ static gboolean tick(GtkWidget* widget) {
 	canvas_width = alloc.width;
 	canvas_height = alloc.height;
 
-	update_units();
+	update_population();
 
 	gtk_widget_queue_draw_area(widget, 0, 0, alloc.width, alloc.height);
 	return TRUE;
 }
 
-std::vector<Vector3> init_graph() {
+void init_graph() {
 	PSystem::GetInstance().CreateLayer(0U);
 	Vector3 origin{ 0, 0, 0 };
 
 	PGraph* graph = nullptr;
 	float graph_width;
 	float graph_height;
-	std::vector<Vector3> obstacles;
-	std::vector<Vector3> open_positions;
-
+	std::vector<Vector3> obstacle_positions;
+	spawn_locations.clear();
 
 	if (environment_file == "") {
 		graph_width = static_cast<float>(canvas_width);
@@ -107,8 +135,8 @@ std::vector<Vector3> init_graph() {
 			{
 				for (int x = 0; x < columns; x++)
 				{
-					if (file_data.at(y).at(x)) obstacles.push_back(Vector3{ x * graph_scale,y * graph_scale,0 });
-					else open_positions.push_back(Vector3{ x * graph_scale,y * graph_scale,0 });
+					if (file_data.at(y).at(x)) obstacle_positions.push_back(Vector3{ x * graph_scale,y * graph_scale,0 });
+					else spawn_locations.push_back(Vector3{ x * graph_scale,y * graph_scale,0 });
 				}
 			}
 		}
@@ -122,54 +150,40 @@ std::vector<Vector3> init_graph() {
 	Vector3 dimensions{ graph_width , graph_height , 0 };
 	graph = PSystem::GetInstance().InitGraph(0U, origin, dimensions, graph_scale);
 
-	for (size_t i = 0; i < obstacles.size(); i++)
+	for (size_t i = 0; i < obstacle_positions.size(); i++)
 	{
-		graph->NodeAt(obstacles.at(i))->obstacle = true;
+		Vector3 pos = obstacle_positions.at(i);
+		Obstacle* cairo_obstacle = new Obstacle(pos[0],pos[1],graph_scale,graph_scale);
+		obstacles.push_back(cairo_obstacle);
+		graph->NodeAt(pos)->obstacle = true;
 	}
-
-	return open_positions;
 }
 
-void init_targets(std::vector<Vector3>& open_positions) {
+void init_targets() {
 	for (int i = 0; i < targets.size(); i++) {
 		delete targets.at(i);
 	}
 	targets.clear();
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(-5.0, 5.0);
+
 	for (int i = 0; i < target_count; i++)
 	{
-		Vector3 random_position = open_positions.at(std::rand() % open_positions.size());
-		targets.push_back(new Target(random_position[0] + static_cast<float>(dis(gen)), random_position[1] + static_cast<float>(dis(gen))));
+		Vector3 random_position = spawn_locations.at(std::rand() % spawn_locations.size());
+		targets.push_back(new Target(random_position[0] + static_cast<float>(spawn_location_distribution(gen)), random_position[1] + static_cast<float>(spawn_location_distribution(gen))));
 	}
 }
 
-void init_units(std::vector<Vector3>& open_positions) {
-	for (int i = 0; i < units.size(); i++) {
-		delete units.at(i);
+void reset_units() {
+	for (auto u : units)
+	{
+		delete u;
 	}
 	units.clear();
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(-5.0, 5.0);
-	for (int i = 0; i < population; i++)
-	{
-		Vector3 random_position = open_positions.at(std::rand() % open_positions.size());
-		Unit* u = new Unit(random_position[0] + dis(gen), random_position[1] + dis(gen));
-
-		int random_target_index = std::rand() % target_count;
-		Target* random_target = targets.at(random_target_index);
-		u->SetTarget(random_target->x, random_target->y);
-		units.push_back(u);
-	}
 }
 
 static void reset(GtkWidget* widget, gpointer data) {
-	std::vector<Vector3> open = init_graph();
-	init_targets(open);
-	init_units(open);
+	init_graph();
+	init_targets();
+	reset_units();
 }
 
 int main(int argc, char *argv[])

@@ -53,6 +53,11 @@ void Unit::SetTarget(float x, float y)
 	PSystem::GetInstance().UpdateUnitTarget(system_id, blaze::StaticVector<float, 3>{ x, y, 0 });
 }
 
+bool Unit::IsComplete()
+{
+	return complete;
+}
+
 void Unit::UpdateVelocity() {
 	if (blaze::length(vel) > 1.0) {
 		vel = blaze::normalize(vel);

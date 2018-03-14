@@ -11,6 +11,7 @@ public:
 	void AddForce(float x, float y);
 	void Update();
 	void SetTarget(float x, float y);
+	bool IsComplete();
 	~Unit();
 private:
 	bool complete = false;

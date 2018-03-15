@@ -171,25 +171,23 @@ void PSystem::UpdateInteractions()
 			if (!path->empty()) {
 				next = path->back();
 				sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
-				while (sqr_next_distance < 49 && path->size() > 1) {
+				while (sqr_next_distance < 80 && path->size() > 1) {
 					path->pop_back();
 					next = path->back();
 					sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
 				}
 			}
 			follow_vector = next - current->GetPosition();
-			follow_vector = follow_vector / std::sqrt(sqr_next_distance);
 		}
 		else {
 			layer->ClearPath(id);
 			PUnit* leader = GetUnit(leaders.at(i));
 			follow_vector = leader->GetPosition() - current->GetPosition();
-			follow_vector = follow_vector / blaze::length(leader->GetPosition() - current->GetPosition());
 		}
 		follow_vector = follow_vector * follow_factor;
 
 		// ===Obstacle avoidance===
-		Vector3 avoidance_vector{0,0,0};
+		Vector3 avoidance_vector{ 0,0,0 };
 
 		Vector3 estimated_position = current->GetPosition() + ((flocking_vector + follow_vector) * lookahead);
 
@@ -200,7 +198,7 @@ void PSystem::UpdateInteractions()
 			avoidance_vector = avoidance_vector * avoidance_factor;
 		}
 
-		forces[id] = flocking_vector + follow_vector + avoidance_vector;
+		forces[id] = flocking_vector + avoidance_vector + follow_vector;
 	}
 }
 
@@ -209,7 +207,7 @@ Vector3 PSystem::GetUnitForce(unsigned int id)
 	if (forces.find(id) != forces.end()) {
 		return forces.at(id);
 	}
-	else return Vector3{0, 0, 0};
+	else return Vector3{ 0, 0, 0 };
 }
 
 void PSystem::CreateLayer(unsigned int layer_id)

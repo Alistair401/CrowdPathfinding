@@ -15,7 +15,7 @@
 #include <PSystem.h>
 #include <PGraph.h>
 
-std::string environment_file = "environments/dense.csv";
+std::string environment_file = "environments/maze.csv";
 
 int population_cap = 50;
 float spawn_chance = 0.2;
@@ -47,10 +47,12 @@ using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 using TimeDuration = std::chrono::duration<double>;
 TimePoint start_time;
 
-double benchmark_duration = 60.0;
+double benchmark_duration = 120.0;
 bool benchmark_complete = true;
 
-bool render = true;
+bool render = false;
+
+unsigned int units_completed = 0;
 
 static void do_drawing(cairo_t *cr)
 {
@@ -83,6 +85,7 @@ void update_population() {
 	PSystem::GetInstance().UpdateInteractions();
 	for (auto u : to_remove)
 	{
+		units_completed++;
 		units.erase(u);
 	}
 
@@ -101,6 +104,7 @@ void update_population() {
 
 void print_statistics() {
 	std::cout << PSystem::GetInstance().Stats() << std::endl;
+	std::cout << "Agent Tasks Completed: " << std::to_string(units_completed) << std::endl;
 	PSystem::GetInstance().ResetStats();
 }
 
@@ -211,6 +215,7 @@ static void reset(GtkWidget* widget, gpointer data) {
 	init_graph();
 	init_targets();
 	reset_units();
+	units_completed = 0;
 	benchmark_complete = false;
 	start_time = std::chrono::high_resolution_clock::now();
 }

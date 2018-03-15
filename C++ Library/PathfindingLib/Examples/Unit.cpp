@@ -37,7 +37,7 @@ void Unit::Update()
 {
 	if (complete) return;
 	float sqr_target_distance = blaze::sqrLength(blaze::StaticVector<float, 2>{x, y} -target);
-	if (sqr_target_distance < 49.0) {
+	if (sqr_target_distance < 80.0) {
 		complete = true;
 		PSystem::GetInstance().DestroyUnit(system_id);
 	}

@@ -1,11 +1,10 @@
 ﻿#include "stdafx.h"
-#include <PSystem.h>
-#include <PGraph.h>
 #include <random>
 #include <iostream>
 #include <fstream>
 #include <set>
 #include <string>
+#include <chrono>
 #include <blaze\Blaze.h>
 #include <cairo\cairo.h>
 #include <gtk\gtk.h>
@@ -13,10 +12,12 @@
 #include "Unit.h"
 #include "Target.h"
 #include "Obstacle.h"
+#include <PSystem.h>
+#include <PGraph.h>
 
-std::string environment_file = "sparse.csv";
+std::string environment_file = "environments/dense.csv";
 
-int population_cap = 60;
+int population_cap = 50;
 float spawn_chance = 0.2;
 std::vector<Vector3> spawn_locations;
 
@@ -41,6 +42,13 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> spawn_chance_distribution(0, 1.0);
 std::uniform_real_distribution<> spawn_location_distribution(-5.0, 5.0);
+
+using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+using TimeDuration = std::chrono::duration<double>;
+TimePoint start_time;
+
+double benchmark_duration = 60.0;
+bool benchmark_complete = true;
 
 static void do_drawing(cairo_t *cr)
 {
@@ -87,11 +95,26 @@ void update_population() {
 	}
 }
 
+void print_statistics() {
+	std::cout << PSystem::GetInstance().Stats() << std::endl;
+	PSystem::GetInstance().ResetStats();
+}
+
 static gboolean tick(GtkWidget* widget) {
 	GtkAllocation alloc;
 	gtk_widget_get_allocation(widget, &alloc);
 	canvas_width = alloc.width;
 	canvas_height = alloc.height;
+
+	if (benchmark_complete) return TRUE;
+
+	TimePoint current_time = std::chrono::high_resolution_clock::now();
+	TimeDuration elapsed = current_time - start_time;
+	if (elapsed.count() >= benchmark_duration) {
+		print_statistics();
+		benchmark_complete = true;
+		return TRUE;
+	}
 
 	update_population();
 
@@ -184,6 +207,8 @@ static void reset(GtkWidget* widget, gpointer data) {
 	init_graph();
 	init_targets();
 	reset_units();
+	benchmark_complete = false;
+	start_time = std::chrono::high_resolution_clock::now();
 }
 
 int main(int argc, char *argv[])

@@ -5,6 +5,9 @@
 #include <unordered_set>
 #include <limits>
 
+unsigned int Pathfinding::nodes_evaluated = 0;
+unsigned int Pathfinding::a_star_calls = 0;
+
 float EuclideanDistance(Vector3& a, Vector3& b) {
 	Vector3 direction = b - a;
 	return blaze::length(direction);
@@ -27,6 +30,7 @@ std::vector<Vector3>* reconstruct_path(std::unordered_map<IVector3, PGraphNode*,
 
 std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 to)
 {
+	a_star_calls++;
 	PGraphNode* from_node = graph->NodeAt(from);
 	PGraphNode* to_node = graph->NodeAt(to);
 
@@ -41,6 +45,7 @@ std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 
 	open_set.Insert(from_node);
 
 	while (!open_set.IsEmpty()) {
+		nodes_evaluated++;
 		PGraphNode* current = open_set.Remove();
 		if (current == to_node) {
 			return reconstruct_path(&came_from, to_node);
@@ -78,4 +83,20 @@ std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 
 	}
 
 	return new std::vector<Vector3>;
+}
+
+void Pathfinding::ResetStats()
+{
+	nodes_evaluated = 0;
+	a_star_calls = 0;
+}
+
+unsigned int Pathfinding::EvaluatedCount()
+{
+	return nodes_evaluated;
+}
+
+unsigned int Pathfinding::CallCount()
+{
+	return a_star_calls;
 }

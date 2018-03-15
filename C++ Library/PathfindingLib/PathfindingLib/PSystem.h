@@ -4,6 +4,7 @@
 #include "PUnit.h"
 #include "PUnitLayer.h"
 #include "GL\glew.h"
+#include <string>
 
 class PSystem
 {
@@ -21,9 +22,12 @@ public:
 	void DestroyUnit(unsigned int id);
 	// Unit Interaction
 	void UpdateInteractions();
-	blaze::StaticVector<float, 3> GetUnitForce(unsigned int id);
+	Vector3 GetUnitForce(unsigned int id);
 	// Layer Management
 	void CreateLayer(unsigned int layer_id);
+	// Statistics
+	std::string Stats();
+	void ResetStats();
 private:
 	// Singleton
 	PSystem();
@@ -33,8 +37,10 @@ private:
 	PUnit* GetUnit(unsigned int unit_id);
 	// Unit Interaction
 	std::unordered_map<unsigned int, Vector3> forces;
-	float target_factor = 0.1f;
-	float target_similarity_threshold = 50;
+	float follow_factor = 0.05f;
+	float target_similarity_threshold = 50.0f;
+	float avoidance_factor = 4.0f;
+	float lookahead = 20.0f;
 	// Layer Management
 	std::unordered_map<unsigned int, PUnitLayer*> layers;
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;

@@ -149,14 +149,15 @@ void PSystem::UpdateInteractions()
 	for (size_t i = 0; i < unit_ids.size(); i++)
 	{
 		glm::vec4& f = output[i];
-		Vector3 computed_force{ f.x,f.y,f.z };
-		Vector3 target_vector{ 0,0,0 };
-
+		Vector3 flocking_vector{ f.x,f.y,f.z };
 
 		unsigned int id = unit_ids.at(i);
 
 		PUnitLayer* layer = layers.at(layer_allocation.at(id));
 		PUnit* current = layer->GetUnit(id);
+
+		// ===Leader following===
+		Vector3 follow_vector{ 0,0,0 };
 
 		if (leaders.at(i) == 0) {
 			// Calculate and save a path to the target
@@ -176,18 +177,30 @@ void PSystem::UpdateInteractions()
 					sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
 				}
 			}
-			target_vector = next - current->GetPosition();
-			target_vector = target_vector / std::sqrt(sqr_next_distance);
+			follow_vector = next - current->GetPosition();
+			follow_vector = follow_vector / std::sqrt(sqr_next_distance);
 		}
 		else {
 			layer->ClearPath(id);
 			PUnit* leader = GetUnit(leaders.at(i));
-			target_vector = leader->GetPosition() - current->GetPosition();
-			target_vector = target_vector / blaze::length(leader->GetPosition() - current->GetPosition());
+			follow_vector = leader->GetPosition() - current->GetPosition();
+			follow_vector = follow_vector / blaze::length(leader->GetPosition() - current->GetPosition());
+		}
+		follow_vector = follow_vector * follow_factor;
+
+		// ===Obstacle avoidance===
+		Vector3 avoidance_vector{0,0,0};
+
+		Vector3 estimated_position = current->GetPosition() + ((flocking_vector + follow_vector) * lookahead);
+
+		PGraphNode* graph_node = layer->GetGraph()->NodeAt(estimated_position);
+		if (graph_node->obstacle) {
+			Vector3 separation = current->GetPosition() - graph_node->position;
+			avoidance_vector = blaze::normalize(separation) / blaze::length(separation);
+			avoidance_vector = avoidance_vector * avoidance_factor;
 		}
 
-		target_vector = target_vector * target_factor;
-		forces[id] = computed_force + target_vector;
+		forces[id] = flocking_vector + follow_vector + avoidance_vector;
 	}
 }
 
@@ -204,6 +217,18 @@ void PSystem::CreateLayer(unsigned int layer_id)
 	if (layers.find(layer_id) == layers.end()) {
 		layers[layer_id] = new PUnitLayer();
 	}
+}
+
+std::string PSystem::Stats()
+{
+	std::string path_count = "Path Calculations: " + std::to_string(Pathfinding::CallCount());
+	std::string node_count = "Nodes Evaluated: " + std::to_string(Pathfinding::EvaluatedCount());
+	return path_count + "\n" + node_count;
+}
+
+void PSystem::ResetStats()
+{
+	Pathfinding::ResetStats();
 }
 
 void ErrorCallback(int error, const char* description)

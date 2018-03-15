@@ -50,38 +50,42 @@ TimePoint start_time;
 double benchmark_duration = 60.0;
 bool benchmark_complete = true;
 
+bool render = true;
+
 static void do_drawing(cairo_t *cr)
 {
 	cairo_set_source_rgb(cr, 0, 0, 0);
-	std::vector<Unit*> to_remove;
-	for (auto u: units)
-	{
-		if (u->IsComplete()) to_remove.push_back(u);
-		u->Update();
-		u->Draw(cr);
-	}
-	PSystem::GetInstance().UpdateInteractions();
 
-	for (auto u: to_remove)
+	for (auto unit: units)
 	{
-		units.erase(u);
+		unit->Draw(cr);
 	}
-
 	for (auto target : targets) {
 		target->Draw(cr);
 	}
-
 	for (auto obstacle : obstacles) {
 		obstacle->Draw(cr);
 	}
 }
 
 static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
-	do_drawing(cr);
+	if (render) do_drawing(cr);
 	return FALSE;
 }
 
 void update_population() {
+	std::vector<Unit*> to_remove;
+	for (auto u : units)
+	{
+		if (u->IsComplete()) to_remove.push_back(u);
+		u->Update();
+	}
+	PSystem::GetInstance().UpdateInteractions();
+	for (auto u : to_remove)
+	{
+		units.erase(u);
+	}
+
 	if (spawn_locations.empty()) return;
 
 	if (units.size() < population_cap && spawn_chance_distribution(gen) <= spawn_chance) {

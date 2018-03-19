@@ -45,14 +45,14 @@ private:
 	std::unordered_map<unsigned int, PUnitLayer*> layers;
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;
 	// OpenGL
-	GLuint unit_ssbo_index;
+	GLuint unit_ssbo_binding = 1;
 	GLuint unit_ssbo;
-	GLuint count_ssbo_index;
+	GLuint count_ssbo_binding = 2;
 	GLuint count_ssbo;
-	GLuint index_ssbo_index;
+	GLuint index_ssbo_binding = 3;
 	GLuint index_ssbo;
-	GLuint neighbor_ssbo_index;
+	GLuint neighbor_ssbo_binding = 4;
 	GLuint neighbor_ssbo;
-	GLuint output_ssbo_index;
+	GLuint output_ssbo_binding = 5;
 	GLuint output_ssbo;
 };

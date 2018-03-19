@@ -10,7 +10,7 @@ unsigned int Pathfinding::a_star_calls = 0;
 
 float EuclideanDistance(Vector3& a, Vector3& b) {
 	Vector3 direction = b - a;
-	return blaze::length(direction);
+	return glm::length(direction);
 }
 
 float HeuristicCostEstimate(PGraphNode* a, PGraphNode* b) {

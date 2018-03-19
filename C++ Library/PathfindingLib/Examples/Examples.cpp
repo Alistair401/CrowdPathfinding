@@ -5,20 +5,18 @@
 #include <set>
 #include <string>
 #include <chrono>
-#include <blaze\Blaze.h>
 #include <cairo\cairo.h>
 #include <gtk\gtk.h>
 #include <boost\tokenizer.hpp>
 #include "Unit.h"
 #include "Target.h"
 #include "Obstacle.h"
-#include <PSystem.h>
-#include <PGraph.h>
+#include "PSystem.h"
 
-std::string environment_file = "environments/maze.csv";
+std::string environment_file = "environments/dense.csv";
 
 int population_cap = 50;
-float spawn_chance = 0.2;
+float spawn_chance = 0.2f;
 std::vector<Vector3> spawn_locations;
 
 int target_count = 5;
@@ -50,7 +48,7 @@ TimePoint start_time;
 double benchmark_duration = 120.0;
 bool benchmark_complete = true;
 
-bool render = false;
+bool render = true;
 
 unsigned int units_completed = 0;
 

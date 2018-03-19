@@ -2,13 +2,12 @@
 #include "Unit.h"
 #include "Pathfinding.h"
 #include <math.h>
-#include <PSystem.h>
 
 Unit::Unit(float x, float y)
 {
 	this->x = x;
 	this->y = y;
-	system_id = PSystem::GetInstance().CreateUnit(blaze::StaticVector<float, 3>{x, y, 0}, 0);
+	system_id = PSystem::GetInstance().CreateUnit(Vector3{x, y, 0}, 0);
 	SetTarget(x, y);
 }
 
@@ -30,13 +29,13 @@ Unit::~Unit()
 
 void Unit::AddForce(float x, float y) {
 	// assumes mass = 1 and delta_time = 1 since we're not too bothered about the phyiscs
-	vel += blaze::StaticVector<float, 2>{ x, y };
+	vel += Vector2{ x, y };
 }
 
 void Unit::Update()
 {
 	if (complete) return;
-	float sqr_target_distance = blaze::sqrLength(blaze::StaticVector<float, 2>{x, y} -target);
+	float sqr_target_distance = SqrLength(Vector2{x, y} - target);
 	if (sqr_target_distance < 80.0) {
 		complete = true;
 		PSystem::GetInstance().DestroyUnit(system_id);
@@ -49,8 +48,8 @@ void Unit::Update()
 
 void Unit::SetTarget(float x, float y)
 {
-	target = blaze::StaticVector<float, 2>{ x, y };
-	PSystem::GetInstance().UpdateUnitTarget(system_id, blaze::StaticVector<float, 3>{ x, y, 0 });
+	target = Vector2{ x, y };
+	PSystem::GetInstance().UpdateUnitTarget(system_id, Vector3{ x, y, 0 });
 }
 
 bool Unit::IsComplete()
@@ -59,15 +58,15 @@ bool Unit::IsComplete()
 }
 
 void Unit::UpdateVelocity() {
-	if (blaze::length(vel) > 1.0) {
-		vel = blaze::normalize(vel);
+	if (glm::length(vel) > 1.0) {
+		vel = glm::normalize(vel);
 	}
-	this->x += vel.at(0);
-	this->y += vel.at(1);
-	PSystem::GetInstance().UpdateUnitPosition(system_id, blaze::StaticVector<float, 3>{x, y, 0});
+	this->x += vel.x;
+	this->y += vel.y;
+	PSystem::GetInstance().UpdateUnitPosition(system_id, Vector3{x, y, 0});
 }
 
 void Unit::UpdateForces() {
-	blaze::StaticVector<float, 3>& force = PSystem::GetInstance().GetUnitForce(system_id);
-	AddForce(force.at(0), force.at(1));
+	Vector3& force = PSystem::GetInstance().GetUnitForce(system_id);
+	AddForce(force.x, force.y);
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "Drawable.h"
-#include "blaze\Blaze.h"
 #include <vector>
+#include <PSystem.h>
 
 class Unit : public Drawable
 {
@@ -16,8 +16,8 @@ public:
 private:
 	bool complete = false;
 	unsigned int system_id;
-	blaze::StaticVector<float, 2> target{ 0,0 };
-	blaze::StaticVector<float, 2> vel{ 0,0 };
+	Vector2 target{ 0,0 };
+	Vector2 vel{ 0,0 };
 	void UpdateVelocity();
 	void UpdateForces();
 };

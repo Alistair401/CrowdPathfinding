@@ -2,11 +2,11 @@
 #include "PSystem.h"
 #include "Pathfinding.h"
 #include "GLFW\glfw3.h"
-#include "glm\glm.hpp"
 #include <fstream>
+#include <sstream>
 
-glm::vec4 ToGLMVec4(Vector3& blaze_vec) {
-	return glm::vec4(blaze_vec.at(0), blaze_vec.at(1), blaze_vec.at(2), 0);
+glm::vec4 ToGLMVec4(Vector3& vec3) {
+	return glm::vec4(vec3.x, vec3.y, vec3.z, 0);
 }
 
 PSystem& PSystem::GetInstance()
@@ -100,10 +100,10 @@ void PSystem::UpdateInteractions()
 					PUnit* neighbor = layer->GetUnit(*neighbor_it);
 					neighbor_count++;
 
-					float sqr_target_similarity = blaze::sqrLength(current->GetTarget() - neighbor->GetTarget());
+					float sqr_target_similarity = SqrLength(current->GetTarget() - neighbor->GetTarget());
 					if (sqr_target_similarity < target_similarity_threshold) { // units have similar targets
-						float sqr_current_target_distance = blaze::sqrLength(current->GetTarget() - current->GetPosition());
-						float sqr_neighbor_target_distance = blaze::sqrLength(neighbor->GetPosition() - neighbor->GetTarget());
+						float sqr_current_target_distance = SqrLength(current->GetTarget() - current->GetPosition());
+						float sqr_neighbor_target_distance = SqrLength(neighbor->GetPosition() - neighbor->GetTarget());
 						if (sqr_neighbor_target_distance < sqr_current_target_distance) { // neighbor is closer than current
 							leader = *neighbor_it;
 						}
@@ -167,14 +167,14 @@ void PSystem::UpdateInteractions()
 				layer->SetPath(id, path);
 			}
 			Vector3 next = current->GetTarget();
-			float sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+			float sqr_next_distance = SqrLength(current->GetPosition() - next);
 			if (!path->empty()) {
 				next = path->back();
-				sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+				sqr_next_distance = SqrLength(current->GetPosition() - next);
 				while (sqr_next_distance < 80 && path->size() > 1) {
 					path->pop_back();
 					next = path->back();
-					sqr_next_distance = blaze::sqrLength(current->GetPosition() - next);
+					sqr_next_distance = SqrLength(current->GetPosition() - next);
 				}
 			}
 			follow_vector = next - current->GetPosition();
@@ -194,7 +194,7 @@ void PSystem::UpdateInteractions()
 		PGraphNode* graph_node = layer->GetGraph()->NodeAt(estimated_position);
 		if (graph_node->obstacle) {
 			Vector3 separation = current->GetPosition() - graph_node->position;
-			avoidance_vector = blaze::normalize(separation) / blaze::length(separation);
+			avoidance_vector = glm::normalize(separation) / glm::length(separation);
 			avoidance_vector = avoidance_vector * avoidance_factor;
 		}
 

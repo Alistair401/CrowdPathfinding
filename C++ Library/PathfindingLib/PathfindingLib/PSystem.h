@@ -39,7 +39,7 @@ private:
 	std::unordered_map<unsigned int, Vector3> forces;
 	float follow_factor = 0.004f;
 	float target_similarity_threshold = 50.0f;
-	float avoidance_factor = 4.0f;
+	float avoidance_factor = 6.0f;
 	float lookahead = 20.0f;
 	// Layer Management
 	std::unordered_map<unsigned int, PUnitLayer*> layers;

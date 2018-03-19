@@ -43,3 +43,6 @@ C++ Library/PathfindingLib/Examples/x64/
 *.psess
 *.vspx
 *.vsp
+*.lastcodeanalysissucceeded
+*.ipdb
+*.iobj

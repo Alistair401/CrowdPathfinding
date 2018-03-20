@@ -157,6 +157,7 @@
     <ClInclude Include="PSystem.h" />
     <ClInclude Include="PUnit.h" />
     <ClInclude Include="PUnitLayer.h" />
+    <ClInclude Include="SSBO.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -167,6 +168,7 @@
     <ClCompile Include="PSystem.cpp" />
     <ClCompile Include="PUnit.cpp" />
     <ClCompile Include="PUnitLayer.cpp" />
+    <ClCompile Include="SSBO.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

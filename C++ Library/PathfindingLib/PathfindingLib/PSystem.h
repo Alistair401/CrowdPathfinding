@@ -3,7 +3,7 @@
 #include "PGraph.h"
 #include "PUnit.h"
 #include "PUnitLayer.h"
-#include "GL\glew.h"
+#include "SSBO.h"
 #include <string>
 
 class PSystem
@@ -45,14 +45,9 @@ private:
 	std::unordered_map<unsigned int, PUnitLayer*> layers;
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;
 	// OpenGL
-	GLuint unit_ssbo_binding = 1;
-	GLuint unit_ssbo;
-	GLuint count_ssbo_binding = 2;
-	GLuint count_ssbo;
-	GLuint index_ssbo_binding = 3;
-	GLuint index_ssbo;
-	GLuint neighbor_ssbo_binding = 4;
-	GLuint neighbor_ssbo;
-	GLuint output_ssbo_binding = 5;
-	GLuint output_ssbo;
+	SSBO* unit_ssbo;
+	SSBO* count_ssbo;
+	SSBO* index_ssbo;
+	SSBO* neighbor_ssbo;
+	SSBO* output_ssbo;
 };

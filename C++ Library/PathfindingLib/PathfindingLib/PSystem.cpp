@@ -2,6 +2,7 @@
 #include "PSystem.h"
 #include "PathSearch.h"
 #include "GLFW\glfw3.h"
+#include "GL\glew.h"
 #include <fstream>
 #include <sstream>
 
@@ -120,35 +121,24 @@ void PSystem::UpdateInteractions()
 	if (unit_buffer.size() == 0) {
 		return;
 	}
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, unit_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, unit_buffer.size() * 4 * sizeof(GLfloat), &unit_buffer[0], GL_STATIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, unit_ssbo_binding, unit_ssbo);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, count_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, count_buffer.size() * sizeof(GLuint), &count_buffer[0], GL_STATIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, count_ssbo_binding, count_ssbo);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, index_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, index_buffer.size() * sizeof(GLuint), &index_buffer[0], GL_STATIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index_ssbo_binding, index_ssbo);
+	unit_ssbo->Write(unit_buffer.size(), &unit_buffer[0]);
+	count_ssbo->Write(count_buffer.size(), &count_buffer[0]);
+	index_ssbo->Write(index_buffer.size(), &index_buffer[0]);
 
 	if (neighbor_buffer.size() > 0) {
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighbor_ssbo);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, neighbor_buffer.size() * 4 * sizeof(GLfloat), &neighbor_buffer[0], GL_STATIC_DRAW);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, neighbor_ssbo_binding, neighbor_ssbo);
+		neighbor_ssbo->Write(neighbor_buffer.size(), &neighbor_buffer[0]);
 	}
 
 	std::vector<glm::vec4> output;
 	output.resize(unit_buffer.size());
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, output_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, output.size() * 4 * sizeof(GLfloat), &output[0], GL_STATIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, output_ssbo_binding, output_ssbo);
+	output_ssbo->Write(output.size(), &output[0]);
 
 	glDispatchCompute(static_cast<unsigned int>(unit_buffer.size()), 1, 1);
 
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	
-	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, output.size() * 4 * sizeof(GLfloat), &output[0]);
+
+	output_ssbo->Read(output.size(), &output[0]);
 
 	for (size_t i = 0; i < unit_ids.size(); i++)
 	{
@@ -311,23 +301,11 @@ PSystem::PSystem()
 	// Use our newly linked shader program
 	glUseProgram(shader_program_id);
 
-	GLuint unit_block_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "unit_buffer");
-	GLuint count_block_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "count_buffer");
-	GLuint index_block_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "index_buffer");
-	GLuint neighbor_block_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "neighbor_buffer");
-	GLuint output_block_index = glGetProgramResourceIndex(shader_program_id, GL_SHADER_STORAGE_BLOCK, "output_buffer");
-
-	glGenBuffers(1, &unit_ssbo);
-	glGenBuffers(1, &count_ssbo);
-	glGenBuffers(1, &index_ssbo);
-	glGenBuffers(1, &neighbor_ssbo);
-	glGenBuffers(1, &output_ssbo);
-
-	glShaderStorageBlockBinding(shader_program_id, unit_block_index, unit_ssbo_binding);
-	glShaderStorageBlockBinding(shader_program_id, count_block_index, count_ssbo_binding);
-	glShaderStorageBlockBinding(shader_program_id, index_block_index, index_ssbo_binding);
-	glShaderStorageBlockBinding(shader_program_id, neighbor_block_index, neighbor_ssbo_binding);
-	glShaderStorageBlockBinding(shader_program_id, output_block_index, output_ssbo_binding);
+	unit_ssbo = new SSBO(shader_program_id, "unit_buffer", 4 * sizeof(GLfloat));
+	count_ssbo = new SSBO(shader_program_id, "count_buffer", sizeof(unsigned int));
+	index_ssbo = new SSBO(shader_program_id, "index_buffer", sizeof(unsigned int));
+	neighbor_ssbo = new SSBO(shader_program_id, "neighbor_buffer", 4 * sizeof(GLfloat));
+	output_ssbo = new SSBO(shader_program_id, "output_buffer", 4 * sizeof(GLfloat));
 }
 
 PUnit * PSystem::GetUnit(unsigned int unit_id)

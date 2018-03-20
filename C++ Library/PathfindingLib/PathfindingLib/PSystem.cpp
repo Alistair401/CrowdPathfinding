@@ -228,32 +228,34 @@ void ErrorCallback(int error, const char* description)
 	printf("GLFW ERROR: %s\n", description);
 }
 
-PSystem::PSystem()
-{
-	// Init GLFW
+bool InitGLFW() {
 	glfwSetErrorCallback(ErrorCallback);
 	int glfw_err = glfwInit();
 	if (glfw_err == GLFW_FALSE)
 	{
 		printf("ERROR INITIALIZING GLFW\n");
 		glfwTerminate();
-		return;
+		return false;
 	}
 
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	GLFWwindow* offscreen_context = glfwCreateWindow(100, 100, "", NULL, NULL);
 	glfwMakeContextCurrent(offscreen_context);
 
-	// Init GLEW
+	return true;
+}
+
+bool InitGLEW() {
 	GLenum glew_err = glewInit();
 	if (glew_err != GLEW_OK) {
 		printf("ERROR INITIALIZING GLEW: %s\n", glewGetErrorString(glew_err));
-		return;
+		return false;
 	}
-
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	return true;
+}
 
-	// Load our compute shader
+GLuint LoadShader() {
 	std::string compute_shader_code;
 	std::ifstream compute_shader_ifstream;
 
@@ -267,6 +269,7 @@ PSystem::PSystem()
 	}
 	catch (std::ifstream::failure e) {
 		printf("ERROR LOADING COMPUTE SHADER\n");
+		return false;
 	}
 
 	// Copy our shader code to OpenGL memory and compile
@@ -298,14 +301,22 @@ PSystem::PSystem()
 		printf(log);
 	}
 
-	// Use our newly linked shader program
-	glUseProgram(shader_program_id);
+	return shader_program_id;
+}
 
-	unit_ssbo = new SSBO(shader_program_id, "unit_buffer", 4 * sizeof(GLfloat));
-	count_ssbo = new SSBO(shader_program_id, "count_buffer", sizeof(unsigned int));
-	index_ssbo = new SSBO(shader_program_id, "index_buffer", sizeof(unsigned int));
-	neighbor_ssbo = new SSBO(shader_program_id, "neighbor_buffer", 4 * sizeof(GLfloat));
-	output_ssbo = new SSBO(shader_program_id, "output_buffer", 4 * sizeof(GLfloat));
+PSystem::PSystem()
+{
+	InitGLFW();
+	InitGLEW();
+	GLuint shader = LoadShader();
+
+	glUseProgram(shader);
+
+	unit_ssbo = new SSBO(shader, "unit_buffer", 4 * sizeof(GLfloat));
+	count_ssbo = new SSBO(shader, "count_buffer", sizeof(unsigned int));
+	index_ssbo = new SSBO(shader, "index_buffer", sizeof(unsigned int));
+	neighbor_ssbo = new SSBO(shader, "neighbor_buffer", 4 * sizeof(GLfloat));
+	output_ssbo = new SSBO(shader, "output_buffer", 4 * sizeof(GLfloat));
 }
 
 PUnit * PSystem::GetUnit(unsigned int unit_id)

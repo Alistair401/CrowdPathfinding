@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PSystem.h"
-#include "Pathfinding.h"
+#include "PathSearch.h"
 #include "GLFW\glfw3.h"
 #include <fstream>
 #include <sstream>
@@ -167,7 +167,7 @@ void PSystem::UpdateInteractions()
 			// Calculate and save a path to the target
 			std::vector<Vector3>* path = layer->GetPath(id);
 			if (path == nullptr) {
-				path = Pathfinding::a_star(layer->GetGraph(), current->GetPosition(), current->GetTarget());
+				path = PathSearch::AStar(layer->GetGraph(), current->GetPosition(), current->GetTarget());
 				layer->SetPath(id, path);
 			}
 			Vector3 next = current->GetTarget();
@@ -223,14 +223,14 @@ void PSystem::CreateLayer(unsigned int layer_id)
 
 std::string PSystem::Stats()
 {
-	std::string path_count = "Path Calculations: " + std::to_string(Pathfinding::CallCount());
-	std::string node_count = "Nodes Evaluated: " + std::to_string(Pathfinding::EvaluatedCount());
+	std::string path_count = "Path Calculations: " + std::to_string(PathSearch::CallCount());
+	std::string node_count = "Nodes Evaluated: " + std::to_string(PathSearch::EvaluatedCount());
 	return path_count + "\n" + node_count;
 }
 
 void PSystem::ResetStats()
 {
-	Pathfinding::ResetStats();
+	PathSearch::ResetStats();
 }
 
 void ErrorCallback(int error, const char* description)

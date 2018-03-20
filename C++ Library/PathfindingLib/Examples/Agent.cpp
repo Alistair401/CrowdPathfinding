@@ -1,9 +1,8 @@
 #include "stdafx.h"
-#include "Unit.h"
-#include "Pathfinding.h"
+#include "Agent.h"
 #include <math.h>
 
-Unit::Unit(float x, float y)
+Agent::Agent(float x, float y)
 {
 	this->x = x;
 	this->y = y;
@@ -11,7 +10,7 @@ Unit::Unit(float x, float y)
 	SetTarget(x, y);
 }
 
-void Unit::Draw(cairo_t * cr)
+void Agent::Draw(cairo_t * cr)
 {
 	if (complete) return;
 	cairo_set_source_rgb(cr, 0, 0, 1);
@@ -21,18 +20,18 @@ void Unit::Draw(cairo_t * cr)
 	cairo_stroke(cr);
 }
 
-Unit::~Unit()
+Agent::~Agent()
 {
 	if (complete) return;
 	PSystem::GetInstance().DestroyUnit(system_id);
 }
 
-void Unit::AddForce(float x, float y) {
+void Agent::AddForce(float x, float y) {
 	// assumes mass = 1 and delta_time = 1 since we're not too bothered about the phyiscs
 	vel += Vector2{ x, y };
 }
 
-void Unit::Update()
+void Agent::Update()
 {
 	if (complete) return;
 	float sqr_target_distance = SqrLength(Vector2{x, y} - target);
@@ -46,18 +45,18 @@ void Unit::Update()
 	}
 }
 
-void Unit::SetTarget(float x, float y)
+void Agent::SetTarget(float x, float y)
 {
 	target = Vector2{ x, y };
 	PSystem::GetInstance().UpdateUnitTarget(system_id, Vector3{ x, y, 0 });
 }
 
-bool Unit::IsComplete()
+bool Agent::IsComplete()
 {
 	return complete;
 }
 
-void Unit::UpdateVelocity() {
+void Agent::UpdateVelocity() {
 	if (glm::length(vel) > 1.0) {
 		vel = glm::normalize(vel);
 	}
@@ -66,7 +65,7 @@ void Unit::UpdateVelocity() {
 	PSystem::GetInstance().UpdateUnitPosition(system_id, Vector3{x, y, 0});
 }
 
-void Unit::UpdateForces() {
+void Agent::UpdateForces() {
 	Vector3& force = PSystem::GetInstance().GetUnitForce(system_id);
 	AddForce(force.x, force.y);
 }

@@ -8,18 +8,18 @@
 #include <cairo\cairo.h>
 #include <gtk\gtk.h>
 #include <boost\tokenizer.hpp>
-#include "Unit.h"
+#include "Agent.h"
 #include "Target.h"
 #include "Obstacle.h"
 #include "PSystem.h"
 
-std::string environment_file = "environments/dense.csv";
+std::string environment_file = "environments/sparse.csv";
 
 int population_cap = 50;
 float spawn_chance = 0.2f;
 std::vector<Vector3> spawn_locations;
 
-int target_count = 5;
+int target_count = 2;
 
 int window_width = 800;
 int window_height = 600;
@@ -29,7 +29,7 @@ int canvas_height = 0;
 
 float graph_scale = 25;
 
-std::set<Unit*> units;
+std::set<Agent*> units;
 std::vector<Target*> targets;
 std::vector<Obstacle*> obstacles;
 
@@ -74,7 +74,7 @@ static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
 }
 
 void update_population() {
-	std::vector<Unit*> to_remove;
+	std::vector<Agent*> to_remove;
 	for (auto u : units)
 	{
 		if (u->IsComplete()) to_remove.push_back(u);
@@ -91,7 +91,7 @@ void update_population() {
 
 	if (units.size() < population_cap && spawn_chance_distribution(gen) <= spawn_chance) {
 		Vector3 random_position = spawn_locations.at(std::rand() % spawn_locations.size());
-		Unit* u = new Unit(random_position[0] + spawn_location_distribution(gen), random_position[1] + spawn_location_distribution(gen));
+		Agent* u = new Agent(random_position[0] + spawn_location_distribution(gen), random_position[1] + spawn_location_distribution(gen));
 
 		int random_target_index = std::rand() % target_count;
 		Target* random_target = targets.at(random_target_index);

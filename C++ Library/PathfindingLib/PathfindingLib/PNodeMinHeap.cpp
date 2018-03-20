@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "NodeMinHeap.h"
+#include "PNodeMinHeap.h"
 
-NodeMinHeap::NodeMinHeap(std::unordered_map<IVector3, float, IVector3Hash>* f_score_map)
+PNodeMinHeap::PNodeMinHeap(std::unordered_map<IVector3, float, IVector3Hash>* f_score_map)
 {
 	this->f_score = f_score_map;
 }
@@ -18,11 +18,11 @@ int RChild(int index) {
 	return (index * 2) + 2;
 }
 
-void NodeMinHeap::Swap(int a, int b) {
+void PNodeMinHeap::Swap(int a, int b) {
 	std::iter_swap(data.begin() + a, data.begin() + b);
 }
 
-void NodeMinHeap::UpHeapBubble(int index) {
+void PNodeMinHeap::UpHeapBubble(int index) {
 	int parent = Parent(index);
 	if (parent >= 0 && f_score->at(data.at(parent)->index) > f_score->at(data.at(index)->index)) {
 		Swap(parent, index);
@@ -30,7 +30,7 @@ void NodeMinHeap::UpHeapBubble(int index) {
 	}
 }
 
-void NodeMinHeap::DownHeapBubble(int index) {
+void PNodeMinHeap::DownHeapBubble(int index) {
 	int smallest = index;
 	int lchild = LChild(index);
 	int rchild = RChild(index);
@@ -46,19 +46,19 @@ void NodeMinHeap::DownHeapBubble(int index) {
 	}
 }
 
-void NodeMinHeap::Insert(PGraphNode * n)
+void PNodeMinHeap::Insert(PGraphNode * n)
 {
 	data.push_back(n);
 	UpHeapBubble(data.size() - 1);
 }
 
-bool NodeMinHeap::Contains(PGraphNode * n)
+bool PNodeMinHeap::Contains(PGraphNode * n)
 {
 	if (IsEmpty())  return false;
 	return SearchFor(n->index, 0) != -1;
 }
 
-int NodeMinHeap::SearchFor(IVector3 value, int current_index) {
+int PNodeMinHeap::SearchFor(IVector3 value, int current_index) {
 	if (data.at(current_index)->index == value) {
 		return current_index;
 	}
@@ -76,7 +76,7 @@ int NodeMinHeap::SearchFor(IVector3 value, int current_index) {
 	return  l;
 }
 
-PGraphNode * NodeMinHeap::Remove()
+PGraphNode * PNodeMinHeap::Remove()
 {
 	PGraphNode* result = data.at(0);
 	Swap(0, data.size() - 1);
@@ -85,17 +85,17 @@ PGraphNode * NodeMinHeap::Remove()
 	return result;
 }
 
-bool NodeMinHeap::IsEmpty()
+bool PNodeMinHeap::IsEmpty()
 {
 	return data.size() == 0;
 }
 
-void NodeMinHeap::Update(PGraphNode* item) {
+void PNodeMinHeap::Update(PGraphNode* item) {
 	int index = SearchFor(item->index, 0);
 	UpHeapBubble(index);
 }
 
-bool NodeMinHeap::IsHeap(int current_index) {
+bool PNodeMinHeap::IsHeap(int current_index) {
 	if (current_index >= data.size()) {
 		return true;
 	}

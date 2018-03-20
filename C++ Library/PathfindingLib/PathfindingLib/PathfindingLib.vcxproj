@@ -150,8 +150,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
-    <ClInclude Include="NodeMinHeap.h" />
-    <ClInclude Include="Pathfinding.h" />
+    <ClInclude Include="PNodeMinHeap.h" />
+    <ClInclude Include="PathSearch.h" />
     <ClInclude Include="PGraph.h" />
     <ClInclude Include="PGraphNode.h" />
     <ClInclude Include="PSystem.h" />
@@ -161,8 +161,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NodeMinHeap.cpp" />
-    <ClCompile Include="Pathfinding.cpp" />
+    <ClCompile Include="PNodeMinHeap.cpp" />
+    <ClCompile Include="PathSearch.cpp" />
     <ClCompile Include="PGraph.cpp" />
     <ClCompile Include="PSystem.cpp" />
     <ClCompile Include="PUnit.cpp" />

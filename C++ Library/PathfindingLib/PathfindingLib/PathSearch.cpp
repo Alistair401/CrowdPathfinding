@@ -1,12 +1,12 @@
 #include "stdafx.h"
-#include "Pathfinding.h"
-#include "NodeMinHeap.h"
+#include "PathSearch.h"
+#include "PNodeMinHeap.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <limits>
 
-unsigned int Pathfinding::nodes_evaluated = 0;
-unsigned int Pathfinding::a_star_calls = 0;
+unsigned int PathSearch::nodes_evaluated = 0;
+unsigned int PathSearch::a_star_calls = 0;
 
 float EuclideanDistance(Vector3& a, Vector3& b) {
 	Vector3 direction = b - a;
@@ -28,7 +28,7 @@ std::vector<Vector3>* reconstruct_path(std::unordered_map<IVector3, PGraphNode*,
 	return result;
 }
 
-std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 to)
+std::vector<Vector3>* PathSearch::AStar(PGraph * graph, Vector3 from, Vector3 to)
 {
 	a_star_calls++;
 	PGraphNode* from_node = graph->NodeAt(from);
@@ -39,7 +39,7 @@ std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 
 	std::unordered_map<IVector3, PGraphNode*, IVector3Hash> came_from;
 	std::unordered_map<IVector3, float, IVector3Hash> g_score;
 
-	NodeMinHeap open_set(&f_score);
+	PNodeMinHeap open_set(&f_score);
 	f_score.emplace(from_node->index, HeuristicCostEstimate(from_node, to_node)); // must insert into f_score before open_set
 	g_score.emplace(from_node->index, 0);
 	open_set.Insert(from_node);
@@ -85,18 +85,18 @@ std::vector<Vector3>* Pathfinding::a_star(PGraph * graph, Vector3 from, Vector3 
 	return new std::vector<Vector3>;
 }
 
-void Pathfinding::ResetStats()
+void PathSearch::ResetStats()
 {
 	nodes_evaluated = 0;
 	a_star_calls = 0;
 }
 
-unsigned int Pathfinding::EvaluatedCount()
+unsigned int PathSearch::EvaluatedCount()
 {
 	return nodes_evaluated;
 }
 
-unsigned int Pathfinding::CallCount()
+unsigned int PathSearch::CallCount()
 {
 	return a_star_calls;
 }

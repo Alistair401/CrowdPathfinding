@@ -36,10 +36,6 @@ struct ssbo_result_t {
 static const size_t ssbo_result_size = (3 * sizeof(GLfloat)) + sizeof(GLuint);
 static_assert(sizeof(ssbo_result_t) == ssbo_result_size, "Padding Required");
 
-glm::vec4 ToGLMVec4(Vector3& vec3) {
-	return glm::vec4(vec3.x, vec3.y, vec3.z, 0);
-}
-
 PSystem& PSystem::GetInstance()
 {
 	static PSystem instance;
@@ -180,6 +176,9 @@ void PSystem::UpdateInteractions()
 			}
 			path_following_vector = next - current->GetPosition();
 			path_following_vector = path_following_vector * path_following_factor;
+		}
+		else {
+			layer->ClearPath(id);
 		}
 
 		// ===Obstacle avoidance===

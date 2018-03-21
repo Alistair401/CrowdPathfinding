@@ -66,7 +66,7 @@ void main(){
             separation_force += separation_normalized / length(separation);
             cohesion_force += neighbor.position;
 
-            vec3 current_target_to_neighbor_target = current.target - neighbor.target;
+            vec3 current_target_to_neighbor_target = neighbor.target - current.target;
             vec3 current_to_current_target = current.target - current.position;
             vec3 neighbor_to_current_target = current.target - neighbor.position;
 

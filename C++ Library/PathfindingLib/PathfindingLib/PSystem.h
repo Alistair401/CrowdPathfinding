@@ -37,7 +37,7 @@ private:
 	PUnit* GetUnit(unsigned int unit_id);
 	// Unit Interaction
 	std::unordered_map<unsigned int, Vector3> forces;
-	float follow_factor = 0.004f;
+	float path_following_factor = 0.004f;
 	float target_similarity_threshold = 50.0f;
 	float avoidance_factor = 6.0f;
 	float lookahead = 20.0f;
@@ -46,8 +46,6 @@ private:
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;
 	// OpenGL
 	SSBO* unit_ssbo;
-	SSBO* count_ssbo;
-	SSBO* index_ssbo;
 	SSBO* neighbor_ssbo;
 	SSBO* output_ssbo;
 };

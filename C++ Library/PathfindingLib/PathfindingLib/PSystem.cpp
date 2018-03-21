@@ -6,6 +6,36 @@
 #include <fstream>
 #include <sstream>
 
+// Define structs to match those used in the SSBO
+struct ssbo_unit_t {
+	glm::vec3 position;
+	GLfloat padding0;
+	glm::vec3 target;
+	GLuint neighbor_count;
+	GLuint neighbor_start_index;
+	GLuint padding1;
+	GLuint padding2;
+	GLuint padding3;
+};
+static const size_t ssbo_unit_size = (7 * sizeof(GLfloat)) + sizeof(GLuint) + (4 * sizeof(GLuint));
+static_assert(sizeof(ssbo_unit_t) == ssbo_unit_size, "Padding Required");
+
+struct ssbo_neighbor_t {
+	glm::vec3 position;
+	GLfloat padding0;
+	glm::vec3 target;
+	GLfloat padding1;
+};
+static const size_t ssbo_neighbor_size = 8 * sizeof(GLfloat);
+static_assert(sizeof(ssbo_neighbor_t) == ssbo_neighbor_size, "Padding Required");
+
+struct ssbo_result_t {
+	glm::vec3 force;
+	GLuint request_path;
+};
+static const size_t ssbo_result_size = (3 * sizeof(GLfloat)) + sizeof(GLuint);
+static_assert(sizeof(ssbo_result_t) == ssbo_result_size, "Padding Required");
+
 glm::vec4 ToGLMVec4(Vector3& vec3) {
 	return glm::vec4(vec3.x, vec3.y, vec3.z, 0);
 }
@@ -67,12 +97,10 @@ void PSystem::DestroyUnit(unsigned int id)
 void PSystem::UpdateInteractions()
 {
 	std::vector<unsigned int> unit_ids;
-	std::vector<glm::vec4> unit_buffer;
-	std::vector<GLuint> count_buffer;
-	std::vector<GLuint> index_buffer;
-	std::vector<glm::vec4> neighbor_buffer;
+	std::vector<ssbo_unit_t> unit_buffer;
+	std::vector<ssbo_neighbor_t> neighbor_buffer;
 
-	std::vector<unsigned int> leaders;
+	GLuint current_neighbor_index = 0;
 
 	for (auto unit_it = layer_allocation.begin(); unit_it != layer_allocation.end(); unit_it++) {
 		unsigned int unit_id = (*unit_it).first;
@@ -80,57 +108,37 @@ void PSystem::UpdateInteractions()
 		PUnit* current = layer->GetUnit(unit_id);
 		std::vector<std::unordered_set<unsigned int>*> nearby = layer->Nearby(unit_id);
 
-		unsigned int leader = 0;
-
-		unit_ids.push_back(unit_id);
-		unit_buffer.push_back(ToGLMVec4(current->GetPosition()));
-		if (index_buffer.size() == 0) {
-			index_buffer.push_back(0);
-		}
-		else {
-			index_buffer.push_back(index_buffer.back() + count_buffer.back());
-		}
-
-		int neighbor_count = 0;
+		GLuint neighbor_count = 0;
 
 		if (nearby.size() > 0) {
 			for (size_t i = 0; i < nearby.size(); i++)
 			{
 				for (auto neighbor_it = nearby.at(i)->begin(); neighbor_it != nearby.at(i)->end(); neighbor_it++) {
 					if (*neighbor_it == unit_id) continue;
+
 					PUnit* neighbor = layer->GetUnit(*neighbor_it);
 					neighbor_count++;
-
-					float sqr_target_similarity = SqrLength(current->GetTarget() - neighbor->GetTarget());
-					if (sqr_target_similarity < target_similarity_threshold) { // units have similar targets
-						float sqr_current_target_distance = SqrLength(current->GetTarget() - current->GetPosition());
-						float sqr_neighbor_target_distance = SqrLength(neighbor->GetPosition() - neighbor->GetTarget());
-						if (sqr_neighbor_target_distance < sqr_current_target_distance) { // neighbor is closer than current
-							leader = *neighbor_it;
-						}
-					}
-					neighbor_buffer.push_back(ToGLMVec4(neighbor->GetPosition()));
+					neighbor_buffer.push_back(ssbo_neighbor_t{ neighbor->GetPosition(),0, neighbor->GetTarget() });
 				}
 			}
 		}
 
-		count_buffer.push_back(static_cast<GLuint>(neighbor_count));
-
-		leaders.push_back(leader);
+		unit_ids.push_back(unit_id);
+		unit_buffer.push_back(ssbo_unit_t{ current->GetPosition(),0,current->GetTarget(),neighbor_count,current_neighbor_index });
+		current_neighbor_index += neighbor_count;
 	}
+
 	if (unit_buffer.size() == 0) {
 		return;
 	}
 
 	unit_ssbo->Write(unit_buffer.size(), &unit_buffer[0]);
-	count_ssbo->Write(count_buffer.size(), &count_buffer[0]);
-	index_ssbo->Write(index_buffer.size(), &index_buffer[0]);
 
 	if (neighbor_buffer.size() > 0) {
 		neighbor_ssbo->Write(neighbor_buffer.size(), &neighbor_buffer[0]);
 	}
 
-	std::vector<glm::vec4> output;
+	std::vector<ssbo_result_t> output;
 	output.resize(unit_buffer.size());
 	output_ssbo->Write(output.size(), &output[0]);
 
@@ -142,18 +150,17 @@ void PSystem::UpdateInteractions()
 
 	for (size_t i = 0; i < unit_ids.size(); i++)
 	{
-		glm::vec4& f = output[i];
-		Vector3 flocking_vector{ f.x,f.y,f.z };
+		ssbo_result_t& result = output[i];
 
 		unsigned int id = unit_ids.at(i);
 
 		PUnitLayer* layer = layers.at(layer_allocation.at(id));
 		PUnit* current = layer->GetUnit(id);
 
-		// ===Leader following===
-		Vector3 follow_vector{ 0,0,0 };
+		// ===Path Request Fulfillment===
+		Vector3 path_following_vector{ 0,0,0 };
 
-		if (leaders.at(i) == 0) {
+		if (result.request_path == 1) {
 			// Calculate and save a path to the target
 			std::vector<Vector3>* path = layer->GetPath(id);
 			if (path == nullptr) {
@@ -171,19 +178,14 @@ void PSystem::UpdateInteractions()
 					sqr_next_distance = SqrLength(current->GetPosition() - next);
 				}
 			}
-			follow_vector = next - current->GetPosition();
+			path_following_vector = next - current->GetPosition();
+			path_following_vector = path_following_vector * path_following_factor;
 		}
-		else {
-			layer->ClearPath(id);
-			PUnit* leader = GetUnit(leaders.at(i));
-			follow_vector = leader->GetPosition() - current->GetPosition();
-		}
-		follow_vector = follow_vector * follow_factor;
 
 		// ===Obstacle avoidance===
 		Vector3 avoidance_vector{ 0,0,0 };
 
-		Vector3 estimated_position = current->GetPosition() + ((flocking_vector + follow_vector) * lookahead);
+		Vector3 estimated_position = current->GetPosition() + ((result.force + path_following_vector) * lookahead);
 
 		PGraphNode* graph_node = layer->GetGraph()->NodeAt(estimated_position);
 		if (graph_node->obstacle) {
@@ -192,7 +194,7 @@ void PSystem::UpdateInteractions()
 			avoidance_vector = avoidance_vector * avoidance_factor;
 		}
 
-		forces[id] = flocking_vector + avoidance_vector + follow_vector;
+		forces[id] = result.force + path_following_vector + avoidance_vector;
 	}
 }
 
@@ -312,11 +314,9 @@ PSystem::PSystem()
 
 	glUseProgram(shader);
 
-	unit_ssbo = new SSBO(shader, "unit_buffer", 4 * sizeof(GLfloat));
-	count_ssbo = new SSBO(shader, "count_buffer", sizeof(unsigned int));
-	index_ssbo = new SSBO(shader, "index_buffer", sizeof(unsigned int));
-	neighbor_ssbo = new SSBO(shader, "neighbor_buffer", 4 * sizeof(GLfloat));
-	output_ssbo = new SSBO(shader, "output_buffer", 4 * sizeof(GLfloat));
+	unit_ssbo = new SSBO(shader, "unit_buffer", ssbo_unit_size);
+	neighbor_ssbo = new SSBO(shader, "neighbor_buffer", ssbo_neighbor_size);
+	output_ssbo = new SSBO(shader, "output_buffer", ssbo_result_size);
 }
 
 PUnit * PSystem::GetUnit(unsigned int unit_id)

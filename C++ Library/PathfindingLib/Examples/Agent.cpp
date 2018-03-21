@@ -35,7 +35,7 @@ void Agent::Update()
 {
 	if (complete) return;
 	float sqr_target_distance = SqrLength(Vector2{x, y} - target);
-	if (sqr_target_distance < 80.0) {
+	if (sqr_target_distance < 100.0) {
 		complete = true;
 		PSystem::GetInstance().DestroyUnit(system_id);
 	}

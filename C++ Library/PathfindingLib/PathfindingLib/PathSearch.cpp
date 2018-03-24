@@ -35,9 +35,9 @@ std::vector<Vector3>* PathSearch::AStar(PGraph * graph, Vector3 from, Vector3 to
 	PGraphNode* to_node = graph->NodeAt(to);
 
 	std::unordered_map<IVector3, float, IVector3Hash> f_score;
-	std::unordered_set<IVector3, IVector3Hash> closed_set;
-	std::unordered_map<IVector3, PGraphNode*, IVector3Hash> came_from;
 	std::unordered_map<IVector3, float, IVector3Hash> g_score;
+	std::unordered_map<IVector3, PGraphNode*, IVector3Hash> came_from;
+	std::unordered_set<IVector3, IVector3Hash> closed_set;
 
 	PNodeMinHeap open_set(&f_score);
 	f_score.emplace(from_node->index, HeuristicCostEstimate(from_node, to_node)); // must insert into f_score before open_set

@@ -246,13 +246,15 @@ int main(int argc, char *argv[])
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(reset_button, "clicked", G_CALLBACK(reset), NULL);
 
-	update_timer = g_timeout_add(17, (GSourceFunc)tick, drawing_area);
+	update_timer = g_timeout_add_full(G_PRIORITY_HIGH,17, (GSourceFunc)tick, drawing_area,NULL);
 
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 	gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
 	gtk_window_set_title(GTK_WINDOW(window), "Pathfinding Examples");
 
 	gtk_widget_show_all(window);
+
+	srand(time(NULL));
 
 	gtk_main();
 

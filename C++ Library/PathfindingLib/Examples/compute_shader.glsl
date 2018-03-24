@@ -70,9 +70,9 @@ void main(){
             vec3 current_to_current_target = current.target - current.position;
             vec3 neighbor_to_current_target = current.target - neighbor.position;
 
-            float neighbor_target_similarity = dot(current_target_to_neighbor_target,current_target_to_neighbor_target);
-            float current_to_target_distance = dot(current_to_current_target,current_to_current_target);
-            float neighbor_to_target_distance = dot(neighbor_to_current_target,neighbor_to_current_target);
+            float neighbor_target_similarity = length(current_target_to_neighbor_target);
+            float current_to_target_distance = length(current_to_current_target);
+            float neighbor_to_target_distance = length(neighbor_to_current_target);
 
             if (neighbor_target_similarity < target_similarity_threshold 
             && neighbor_to_target_distance < current_to_target_distance

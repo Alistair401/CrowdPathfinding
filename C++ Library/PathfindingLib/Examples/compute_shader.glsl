@@ -37,7 +37,7 @@ layout (std430) buffer output_buffer
     Result outputs[];
 };
 
-const float cohesion = 0.06f;
+const float cohesion = 0.04f;
 const float separation = 1.0f;
 const float following = 0.004f;
 const float target_similarity_threshold = 50.0f;

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "PathSearch.h"
+#include "Pathfinding.h"
 #include "PNodeMinHeap.h"
 #include <unordered_map>
 #include <unordered_set>

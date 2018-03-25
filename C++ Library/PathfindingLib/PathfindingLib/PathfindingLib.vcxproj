@@ -151,7 +151,7 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="PNodeMinHeap.h" />
-    <ClInclude Include="PathSearch.h" />
+    <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="PGraph.h" />
     <ClInclude Include="PGraphNode.h" />
     <ClInclude Include="PSystem.h" />
@@ -163,7 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PNodeMinHeap.cpp" />
-    <ClCompile Include="PathSearch.cpp" />
+    <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="PGraph.cpp" />
     <ClCompile Include="PSystem.cpp" />
     <ClCompile Include="PUnit.cpp" />

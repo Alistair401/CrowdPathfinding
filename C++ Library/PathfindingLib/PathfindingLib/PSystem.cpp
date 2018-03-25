@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PSystem.h"
-#include "PathSearch.h"
+#include "Pathfinding.h"
 #include "GLFW\glfw3.h"
 #include "GL\glew.h"
 #include <fstream>

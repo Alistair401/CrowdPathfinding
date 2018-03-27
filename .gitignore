@@ -46,3 +46,6 @@ C++ Library/PathfindingLib/Examples/x64/
 *.lastcodeanalysissucceeded
 *.ipdb
 *.iobj
+C++ Library/PathfindingLib/x64/
+C++ Library/Examples/x64/
+C++ Library/.vs/

@@ -37,10 +37,13 @@ private:
 	PUnit* GetUnit(unsigned int unit_id);
 	// Unit Interaction
 	std::unordered_map<unsigned int, Vector3> forces;
-	float path_following_factor = 0.004f;
+	float path_following_weight = 0.004f;
+	float avoidance_weight = 6.0f;
+	float cohesion_weight = 0.04f;
+	float separation_weight = 1.0f;
+	float leader_following_weight = 0.004f;
 	float target_similarity_threshold = 50.0f;
-	float avoidance_factor = 6.0f;
-	float lookahead = 20.0f;
+	float avoidance_lookahead = 20.0f;
 	// Layer Management
 	std::unordered_map<unsigned int, PUnitLayer*> layers;
 	std::unordered_map<unsigned int, unsigned int> layer_allocation;

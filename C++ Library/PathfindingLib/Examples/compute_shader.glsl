@@ -37,10 +37,10 @@ layout (std430) buffer output_buffer
     Result outputs[];
 };
 
-const float cohesion = 0.04f;
-const float separation = 1.0f;
-const float following = 0.004f;
-const float target_similarity_threshold = 50.0f;
+uniform float cohesion;
+uniform float separation;
+uniform float following;
+uniform float target_similarity_threshold;
 
 void main(){
     Unit current = units[gl_WorkGroupID.x];

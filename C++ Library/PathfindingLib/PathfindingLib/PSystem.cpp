@@ -175,7 +175,7 @@ void PSystem::UpdateInteractions()
 				}
 			}
 			path_following_vector = next - current->GetPosition();
-			path_following_vector = path_following_vector * path_following_factor;
+			path_following_vector = path_following_vector * path_following_weight;
 		}
 		else {
 			layer->ClearPath(id);
@@ -184,13 +184,13 @@ void PSystem::UpdateInteractions()
 		// ===Obstacle avoidance===
 		Vector3 avoidance_vector{ 0,0,0 };
 
-		Vector3 estimated_position = current->GetPosition() + ((result.force + path_following_vector) * lookahead);
+		Vector3 estimated_position = current->GetPosition() + ((result.force + path_following_vector) * avoidance_lookahead);
 
 		PGraphNode* graph_node = layer->GetGraph()->NodeAt(estimated_position);
 		if (graph_node->obstacle) {
 			Vector3 separation = current->GetPosition() - graph_node->position;
 			avoidance_vector = glm::normalize(separation) / glm::length(separation);
-			avoidance_vector = avoidance_vector * avoidance_factor;
+			avoidance_vector = avoidance_vector * avoidance_weight;
 		}
 
 		forces[id] = result.force + path_following_vector + avoidance_vector;
@@ -312,6 +312,11 @@ PSystem::PSystem()
 	GLuint shader = LoadShader();
 
 	glUseProgram(shader);
+
+	glUniform1f(glGetUniformLocation(shader, "cohesion"), cohesion_weight);
+	glUniform1f(glGetUniformLocation(shader, "separation"), separation_weight);
+	glUniform1f(glGetUniformLocation(shader, "following"), leader_following_weight);
+	glUniform1f(glGetUniformLocation(shader, "target_similarity_threshold"), target_similarity_threshold);
 
 	unit_ssbo = new SSBO(shader, "unit_buffer", ssbo_unit_size);
 	neighbor_ssbo = new SSBO(shader, "neighbor_buffer", ssbo_neighbor_size);

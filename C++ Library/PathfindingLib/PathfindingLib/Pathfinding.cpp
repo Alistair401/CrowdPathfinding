@@ -41,7 +41,7 @@ std::vector<Vector3>* PathSearch::AStar(PGraph * graph, Vector3 from, Vector3 to
 
 	PNodeMinHeap open_set(&f_score);
 	f_score.emplace(from_node->index, HeuristicCostEstimate(from_node, to_node)); // must insert into f_score before open_set
-	g_score.emplace(from_node->index, 0);
+	g_score.emplace(from_node->index, 0.0f);
 	open_set.Insert(from_node);
 
 	while (!open_set.IsEmpty()) {

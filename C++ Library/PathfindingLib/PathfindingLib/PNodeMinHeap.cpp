@@ -49,7 +49,7 @@ void PNodeMinHeap::DownHeapBubble(int index) {
 void PNodeMinHeap::Insert(PGraphNode * n)
 {
 	data.push_back(n);
-	UpHeapBubble(data.size() - 1);
+	UpHeapBubble(static_cast<int>(data.size()) - 1);
 }
 
 bool PNodeMinHeap::Contains(PGraphNode * n)
@@ -79,7 +79,7 @@ int PNodeMinHeap::SearchFor(IVector3 value, int current_index) {
 PGraphNode * PNodeMinHeap::Remove()
 {
 	PGraphNode* result = data.at(0);
-	Swap(0, data.size() - 1);
+	Swap(0, static_cast<int>(data.size()) - 1);
 	data.pop_back();
 	DownHeapBubble(0);
 	return result;

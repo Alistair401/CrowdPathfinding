@@ -112,6 +112,12 @@
     </Link>
     <Lib />
     <Lib />
+    <PreBuildEvent>
+      <Command>python compile_resources.py</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Compiling Resources</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -147,6 +153,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>python compile_resources.py</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Compiling Resources</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -162,6 +174,10 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="compute_shader.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="PNodeMinHeap.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="PGraph.cpp" />

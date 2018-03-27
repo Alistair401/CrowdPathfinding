@@ -5,6 +5,7 @@
 #include "GL\glew.h"
 #include <fstream>
 #include <sstream>
+#include "compute_shader.c"
 
 // Define structs to match those used in the SSBO
 struct ssbo_unit_t {
@@ -35,6 +36,11 @@ struct ssbo_result_t {
 };
 static const size_t ssbo_result_size = (3 * sizeof(GLfloat)) + sizeof(GLuint);
 static_assert(sizeof(ssbo_result_t) == ssbo_result_size, "Padding Required");
+
+
+// Load compute shader from linked resource
+extern "C" const char compute_shader[];
+extern "C" const size_t compute_shader_len;
 
 PSystem& PSystem::GetInstance()
 {
@@ -257,31 +263,15 @@ bool InitGLEW() {
 }
 
 GLuint LoadShader() {
-	std::string compute_shader_code;
-	std::ifstream compute_shader_ifstream;
-
-	try
-	{
-		compute_shader_ifstream.open("compute_shader.glsl");
-		std::stringstream compute_shader_stream;
-		compute_shader_stream << compute_shader_ifstream.rdbuf();
-		compute_shader_ifstream.close();
-		compute_shader_code = compute_shader_stream.str();
-	}
-	catch (std::ifstream::failure e) {
-		printf("ERROR LOADING COMPUTE SHADER\n");
-		return false;
-	}
-
-	// Copy our shader code to OpenGL memory and compile
-	const char* compute_shader_buffer = compute_shader_code.c_str();
 
 	GLuint compute_shader_buffer_id;
 	GLint success = 0;
 	char log[512];
 
+	char const *code = {compute_shader};
+
 	compute_shader_buffer_id = glCreateShader(GL_COMPUTE_SHADER);
-	glShaderSource(compute_shader_buffer_id, 1, &compute_shader_buffer, NULL);
+	glShaderSource(compute_shader_buffer_id, 1, &code, NULL);
 	glCompileShader(compute_shader_buffer_id);
 
 	// Check if our shader successfully compiled
